@@ -1,0 +1,2 @@
+BEC_POLY_polygon.shp filter=lfs diff=lfs merge=lfs -text
+*.shp filter=lfs diff=lfs merge=lfs -text
