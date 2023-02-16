@@ -11,7 +11,6 @@
 library(readr) #download cvs
 library(dplyr) #piping and data managment
 library(elevatr) #elevation data from the web
-library(sp)
 library(sf)
 library(rgdal)
 
@@ -23,16 +22,19 @@ amel.alni.df <- read_csv("data/amelanchieralnifolia.csv",  show_col_types = F)%>
 #note: gbif occurrences elevation units is in meters (m)
 amel.alni.location <- amel.alni.df %>% 
                     filter(is.na(elevation)) %>% #filter by elevation values containing NA (i.e. missing elevation)
-                    select(x = decimalLongitude, y = decimalLatitude) %>% 
+                    select(x = decimalLongitude, y = decimalLatitude, ID = gbifID) %>% 
                     as.data.frame()
 
-
-#pull elevation data
+#define projection 
 wkt <- sf::st_crs(4326)[[2]] #projection for lat-long coordinates - WGS84 ellipsoid
-
-
 #data source 'src' is Copernicus Digital Elevation Model (DEM) - an AMAZON Sustainability Data Initiative
-#z = 12, determines ground resolution, at 45 degrees lat z = 10 is ~108 meters (https://github.com/tilezen/joerd/blob/master/docs/data-sources.md#what-is-the-ground-resolution)
-amel.alni.elev <- get_elev_point(locations = amel.alni.location, units = 'meters', prj = wkt, src = 'aws', z = 10)
-save(amel.alni.elve, file='amel.alni.elev.Rda')
+#z = 12, determines ground resolution, at 45 degrees lat z = 9 is ~216 meters resolution (https://github.com/tilezen/joerd/blob/master/docs/data-sources.md#what-is-the-ground-resolution)
+amel.alni.elev <- get_elev_point(locations = amel.alni.location, units = 'meters', prj = wkt, src = 'aws', z = 9) #~3 minute processing 
+save(amel.alni.elev, file='amel.alni.elev.Rda') #save dataframe to save time if reloading
+
+load('amel.alni.elev.Rda') #load elevation data
+temp_df <- as.data.frame(amel.alni.elev@data) #elevation data with corresponding ID (gbif ID)
+
+amel.alni.df.complete <- amel.alni.df %>% inner_join(temp_df, by = c('gbifID'='ID',
+                                                                     'elevation' = 'elevation')) 
 
