@@ -45,7 +45,7 @@ latlon_rn <- obs_rn %>% dplyr::select(decimalLongitude, decimalLatitude)
 latlon_vp <- obs_vp %>% dplyr::select(decimalLongitude, decimalLatitude)
 
 ##PNW extent
-pnw <- raster(paste0("pnw_raster_10000.tif"))
+pnw <- raster(paste0(here("data/pnw_raster_10000.tif")))
 plot(pnw)
 
 geographic_extent_pnw <- extent(pnw)
@@ -227,39 +227,352 @@ box()
 
 
 #Climate data 2021-2040
-forecastdata_1 <- getData(name = "CMIP5",
-                        var = "bio",
-                        res = 2.5,
-                        model = , #Which model should we use??
-                        rcp = ,
-                        path = here("data"))
+modelBC_rcp26_year50 <- getData(name = "CMIP5",
+                                var = "bio",
+                                res = 2.5,
+                                model = "BC", #model BCC_CSM1.1
+                                rcp = 26,
+                                year = 50,
+                                path = here("data"))
 
-#2041-2060
-forecastdata_2
+modelBC_rcp26_year70 <- getData(name = "CMIP5",
+                                var = "bio",
+                                res = 2.5,
+                                model = "BC", #model BCC_CSM1.1
+                                rcp = 26,
+                                year = 70,
+                                path = here("data"))
 
-#2061-2080
-forecastdata_3
+modelBC_rcp85_year50 <- getData(name = "CMIP5",
+                                var = "bio",
+                                res = 2.5,
+                                model = "BC", #model BCC_CSM1.1
+                                rcp = 85,
+                                year = 50,
+                                path = here("data"))
 
-#2081-2100
-forecastdata_4
-
+modelBC_rcp85_year70 <- getData(name = "CMIP5",
+                                var = "bio",
+                                res = 2.5,
+                                model = "BC", #model BCC_CSM1.1
+                                rcp = 85,
+                                year = 70,
+                                path = here("data"))
 
 # DON'T PUSH THIS DOWNLOAD, TOO BIG FOR GITHUB
 
+#RCP 26 year 50
+
+modelBC_rcp26_year50 <- brick(modelBC_rcp26_year50)
+
+names(modelBC_rcp26_year50) <- names(bioclim_data_pnw)
+
+forecast_presence_aa_26_50 <- dismo::predict(object = bc_model_aa,
+                                             x = modelBC_rcp26_year50,
+                                             ext = geographic_extent_pnw)
+
+plot(wrld_simpl,
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE,
+     col = "grey95")
+
+plot(forecast_presence_aa_26_50, add = TRUE)
+
+plot(wrld_simpl, add=TRUE, border = "grey5")
+
+points(x = latlon_aa$decimalLongitude,
+       y = latlon_aa$decimalLatitude,
+       col = "#E7298A",
+       pch = 20,
+       cex = 0.75)
+
+box()
+
+
+#Plotting based on presence/absence
+# Plot base map
+plot(wrld_simpl, 
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE, 
+     col = "grey95")
+
+# Only plot areas where probability of occurrence is greater than the threshold
+plot(forecast_presence_aa_26_50 > bc_threshold_aa, 
+     add = TRUE, 
+     legend = FALSE, 
+     col = c(NA, "#E7298A"))
+
+# Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+box()
+
+
+#RCP 26 year 70
+
+modelBC_rcp26_year70 <- brick(modelBC_rcp26_year70)
+
+names(modelBC_rcp26_year70) <- names(bioclim_data_pnw)
+
+forecast_presence_aa_26_70 <- dismo::predict(object = bc_model_aa,
+                                             x = modelBC_rcp26_year70,
+                                             ext = geographic_extent_pnw)
+
+plot(wrld_simpl,
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE,
+     col = "grey95")
+
+plot(forecast_presence_aa_26_70, add = TRUE)
+
+plot(wrld_simpl, add=TRUE, border = "grey5")
+
+points(x = latlon_aa$decimalLongitude,
+       y = latlon_aa$decimalLatitude,
+       col = "#E7298A",
+       pch = 20,
+       cex = 0.75)
+
+box()
+
+
+#Plotting based on presence/absence
+# Plot base map
+plot(wrld_simpl, 
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE, 
+     col = "grey95")
+
+# Only plot areas where probability of occurrence is greater than the threshold
+plot(forecast_presence_aa_26_70 > bc_threshold_aa, 
+     add = TRUE, 
+     legend = FALSE, 
+     col = c(NA, "#E7298A"))
+
+# Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+box()
+
+
+#RCP 85 year 50
+
+modelBC_rcp85_year50 <- brick(modelBC_rcp85_year50)
+
+names(modelBC_rcp85_year50) <- names(bioclim_data_pnw)
+
+forecast_presence_aa_85_50 <- dismo::predict(object = bc_model_aa,
+                                             x = modelBC_rcp85_year50,
+                                             ext = geographic_extent_pnw)
+
+plot(wrld_simpl,
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE,
+     col = "grey95")
+
+plot(forecast_presence_aa_85_50, add = TRUE)
+
+plot(wrld_simpl, add=TRUE, border = "grey5")
+
+points(x = latlon_aa$decimalLongitude,
+       y = latlon_aa$decimalLatitude,
+       col = "#E7298A",
+       pch = 20,
+       cex = 0.75)
+
+box()
+
+
+#Plotting based on presence/absence
+# Plot base map
+plot(wrld_simpl, 
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE, 
+     col = "grey95")
+
+# Only plot areas where probability of occurrence is greater than the threshold
+plot(forecast_presence_aa_85_50 > bc_threshold_aa, 
+     add = TRUE, 
+     legend = FALSE, 
+     col = c(NA, "#E7298A"))
+
+# Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+box()
+
+
+#RCP 85 year 70
+
+modelBC_rcp85_year70 <- brick(modelBC_rcp85_year70)
+
+names(modelBC_rcp85_year70) <- names(bioclim_data_pnw)
+
+forecast_presence_aa_85_70 <- dismo::predict(object = bc_model_aa,
+                                             x = modelBC_rcp85_year70,
+                                             ext = geographic_extent_pnw)
+
+plot(wrld_simpl,
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE,
+     col = "grey95")
+
+plot(forecast_presence_aa_85_70, add = TRUE)
+
+plot(wrld_simpl, add=TRUE, border = "grey5")
+
+points(x = latlon_aa$decimalLongitude,
+       y = latlon_aa$decimalLatitude,
+       col = "#E7298A",
+       pch = 20,
+       cex = 0.75)
+
+box()
+
+
+#Plotting based on presence/absence
+# Plot base map
+plot(wrld_simpl, 
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE, 
+     col = "grey95")
+
+# Only plot areas where probability of occurrence is greater than the threshold
+plot(forecast_presence_aa_85_70 > bc_threshold_aa, 
+     add = TRUE, 
+     legend = FALSE, 
+     col = c(NA, "#E7298A"))
+
+# Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+box()
 
 
 
+#Plotting current and future
+
+par(mfrow=c(2,3))
+
+#Panel 1
+# Plot base map
+plot(wrld_simpl, 
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE, 
+     col = "grey95",
+     main = "Current Predicted Landscape Suitability")
+
+# Only plot areas where probability of occurrence is greater than the threshold
+plot(predict_presence_aa > bc_threshold_aa, 
+     add = TRUE, 
+     legend = FALSE, 
+     col = c(NA, "#E7298A"))
+
+# Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+box()
+
+#Panel 2
+# Plot base map
+plot(wrld_simpl, 
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE, 
+     col = "grey95",
+     main = "Forecast: RCP 26 Year 2050")
+
+# Only plot areas where probability of occurrence is greater than the threshold
+plot(forecast_presence_aa_26_50 > bc_threshold_aa, 
+     add = TRUE, 
+     legend = FALSE, 
+     col = c(NA, "#E7298A"))
+
+# Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+box()
+
+#Panel 3
+# Plot base map
+plot(wrld_simpl, 
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE, 
+     col = "grey95",
+     main = "Forecast: RCP 26 Year 2070")
+
+# Only plot areas where probability of occurrence is greater than the threshold
+plot(forecast_presence_aa_26_70 > bc_threshold_aa, 
+     add = TRUE, 
+     legend = FALSE, 
+     col = c(NA, "#E7298A"))
+
+# Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+box()
+
+#Panel 4
+# Plot base map
+plot(wrld_simpl, 
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE, 
+     col = "grey95",
+     main = "GBIF species observations")
+
+#Plotting point observations
+points(x = latlon_aa$decimalLongitude,
+       y = latlon_aa$decimalLatitude,
+       col = "#E7298A",
+       pch = 20,
+       cex = 0.75)
+
+# Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+box()
 
 
+#Panel 5
+# Plot base map
+plot(wrld_simpl, 
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE, 
+     col = "grey95",
+     main = "Forecast: RCP 85 Year 2050")
 
+# Only plot areas where probability of occurrence is greater than the threshold
+plot(forecast_presence_aa_85_50 > bc_threshold_aa, 
+     add = TRUE, 
+     legend = FALSE, 
+     col = c(NA, "#E7298A"))
 
+# Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+box()
 
+#Panel 3
+# Plot base map
+plot(wrld_simpl, 
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE, 
+     col = "grey95",
+     main = "Forecast: RCP 85 Year 2070")
 
+# Only plot areas where probability of occurrence is greater than the threshold
+plot(forecast_presence_aa_85_70 > bc_threshold_aa, 
+     add = TRUE, 
+     legend = FALSE, 
+     col = c(NA, "#E7298A"))
 
-
-
-
-
+# Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+box()
 
 
 
