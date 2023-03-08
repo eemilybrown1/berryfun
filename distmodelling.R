@@ -529,7 +529,7 @@ points(x = latlon_aa$decimalLongitude,
        y = latlon_aa$decimalLatitude,
        col = "#E7298A",
        pch = 20,
-       cex = 0.75)
+       cex = 0.4)
 
 # Redraw those country borders
 plot(wrld_simpl, add = TRUE, border = "grey5")
