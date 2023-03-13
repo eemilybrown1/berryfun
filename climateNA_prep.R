@@ -48,11 +48,11 @@ View(combined.df) #check
 nrow(occurrence.df) #check number of rows are the same for the occurrence df 
 nrow(combined.df) #and new combined df
 #STOP
-write.csv(combined.df, 'C:\\Users\\terre\\Documents\\R\\berryfun\\data\\vacc_parv_input.csv') #specify local path and push to git. make sure to change file name as needed                                                                    
+write.csv(combined.df, 'C:\\Users\\terre\\Documents\\R\\berryfun\\data\\climateNA_input\\vacc_parv_input.csv', row.names = F) #specify local path and push to git. make sure to change file name as needed                                                                    
 #RENAME FILE^^^
 
 #load occurrence elevation data 
-#useful for saving time if needed to reload
+#useful for saving time if needed to restart session
 load('amel.alni.elev.Rda') #Amelanchier alnifolia
 load('rubu.lasi.elev.Rda') #Rubus lasiococcus
 load('rubu.niva.elev.Rda') #Rubus nivalis
