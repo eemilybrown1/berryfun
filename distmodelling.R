@@ -7,16 +7,21 @@ library("rgdal")
 library("dismo")
 library("here")
 library("sf")
+library("geodata")
 
 setwd(here("data"))
 
 ##Loading and prepping data
 
 #Get bioclimatic variable data from worldclim 
-bioclim_data <- getData(name = "worldclim",
-                        var = "bio",
+bioclim_data <- worldclim_global(var = "bio",
                         res = 2.5, #Using this coarse resolution for now because our range spans multiple SRTM tiles
+                        version = '2.1', 
                         path = here("data"))
+bioclim_data <- brick(bioclim_data)
+
+
+
 # DON'T PUSH THIS DOWNLOAD, TOO BIG FOR GITHUB
 
 #Loading GBIF csvs
@@ -93,10 +98,10 @@ title(main = "A. alnifolia observations")
 
 
 #Modelling aa using presence points in pnw extent
-bc_model_aa <- bioclim(x = bioclim_data_pnw, p=latlon_aa)
+model_aa <- bioclim(x = bioclim_data_pnw, p=latlon_aa)
 
 #Predict presence from model
-predict_presence_aa <- dismo::predict(object = bc_model_aa,
+predict_presence_aa <- dismo::predict(object = model_aa,
                                       x = bioclim_data_pnw,
                                       ext = geographic_extent_pnw) 
 
@@ -172,21 +177,21 @@ background_test_aa <- background_aa[group_background_aa == testing_group_aa, ]
 ##Training and testing the model
 
 # Build a model using training data
-bc_model_aa <- bioclim(x= bioclim_data_pnw, p = presence_train_aa)
+model_aa <- bioclim(x= bioclim_data_pnw, p = presence_train_aa)
 
 # Predict presence from model (same as previously, but with the update model)
-predict_presence_aa <- dismo::predict(object = bc_model_aa, 
+predict_presence_aa <- dismo::predict(object = model_aa, 
                                    x = bioclim_data_pnw, 
                                    ext = geographic_extent_pnw)
 
 # Use testing data for model evaluation
-bc_eval_aa <- evaluate(p = presence_test_aa,   # The presence testing data
+eval_aa <- evaluate(p = presence_test_aa,   # The presence testing data
                     a = background_test_aa, # The absence testing data
-                    model = bc_model_aa,    # The model we are evaluating
+                    model = model_aa,    # The model we are evaluating
                     x = bioclim_data_pnw)    # Climatic variables for use by model
 
 # Determine minimum threshold for "presence"
-bc_threshold_aa <- threshold(x = bc_eval_aa, stat = "spec_sens")
+threshold_aa <- threshold(x = eval_aa, stat = "spec_sens")
 
 #We want to use the threshold to paint a map with the predicted range:
 # Plot base map
@@ -195,10 +200,10 @@ plot(wrld_simpl,
      ylim = c(min_lat_pnw, max_lat_pnw),
      axes = TRUE, 
      col = "grey95",
-     main = "Predicted Landscape Suitability to A. alnifolia")
+     main = "Predicted Landscape Suitability \n to A. alnifolia")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(predict_presence_aa > bc_threshold_aa, 
+plot(predict_presence_aa > threshold_aa, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#E7298A"))
@@ -218,68 +223,62 @@ box()
 
 
 #Next: forecasting distributions.
-#Info on worldclim forecasting:
-#CMIP5 uses 5th IPCC report- 6th not available in R yet
-#RCP 26 is lowest emissions scenario, RCP 85 is highest emissions scenario)
-#year should be 50 or 70
-#'model' should be one of "AC", "BC", "CC", "CE", "CN", "GF", "GD", "GS", "HD", "HG", "HE", "IN", "IP", "MI", "MR", "MC", "MP", "MG", or "NO".
+#CMIP6
+#SSP 126 is lowest emissions scenario, SSP 585 is highest emissions scenario)
+#using model "MRI-ESM2-0" based on evaluation from this paper: https://link.springer.com/article/10.1007/s00382-022-06410-1
 
 
+#Climate data
+forecast_ssp126_year50 <- cmip6_world(model = "MRI-ESM2-0",
+                                    ssp = "126",
+                                    time = "2041-2060",
+                                    var = "bioc",
+                                    res = 2.5,
+                                    path = here("data"))
 
-#Climate data 2021-2040
-modelBC_rcp26_year50 <- getData(name = "CMIP5",
-                                var = "bio",
-                                res = 2.5,
-                                model = "BC", #model BCC_CSM1.1
-                                rcp = 26,
-                                year = 50,
-                                path = here("data"))
+forecast_ssp126_year70 <- cmip6_world(model = "MRI-ESM2-0",
+                                    ssp = "126",
+                                    time = "2061-2080",
+                                    var = "bioc",
+                                    res = 2.5,
+                                    path = here("data"))
 
-modelBC_rcp26_year70 <- getData(name = "CMIP5",
-                                var = "bio",
-                                res = 2.5,
-                                model = "BC", #model BCC_CSM1.1
-                                rcp = 26,
-                                year = 70,
-                                path = here("data"))
+forecast_ssp585_year50 <- cmip6_world(model = "MRI-ESM2-0",
+                                    ssp = "585",
+                                    time = "2041-2060",
+                                    var = "bioc",
+                                    res = 2.5,
+                                    path = here("data"))
 
-modelBC_rcp85_year50 <- getData(name = "CMIP5",
-                                var = "bio",
-                                res = 2.5,
-                                model = "BC", #model BCC_CSM1.1
-                                rcp = 85,
-                                year = 50,
-                                path = here("data"))
-
-modelBC_rcp85_year70 <- getData(name = "CMIP5",
-                                var = "bio",
-                                res = 2.5,
-                                model = "BC", #model BCC_CSM1.1
-                                rcp = 85,
-                                year = 70,
-                                path = here("data"))
+forecast_ssp585_year70 <- cmip6_world(model = "MRI-ESM2-0",
+                                    ssp = "585",
+                                    time = "2061-2080",
+                                    var = "bioc",
+                                    res = 2.5,
+                                    path = here("data"))
 
 # DON'T PUSH THIS DOWNLOAD, TOO BIG FOR GITHUB
 
 #Getting all the climate versions in the right format 
 
-modelBC_rcp26_year50 <- brick(modelBC_rcp26_year50)
-names(modelBC_rcp26_year50) <- names(bioclim_data_pnw)
+forecast_ssp126_year50 <- brick(forecast_ssp126_year50)
+names(forecast_ssp126_year50) <- names(bioclim_data_pnw)
 
-modelBC_rcp26_year70 <- brick(modelBC_rcp26_year70)
-names(modelBC_rcp26_year70) <- names(bioclim_data_pnw)
+forecast_ssp126_year70 <- brick(forecast_ssp126_year70)
+names(forecast_ssp126_year70) <- names(bioclim_data_pnw)
 
-modelBC_rcp85_year50 <- brick(modelBC_rcp85_year50)
-names(modelBC_rcp85_year50) <- names(bioclim_data_pnw)
+forecast_ssp585_year50 <- brick(forecast_ssp585_year50)
+names(forecast_ssp585_year50) <- names(bioclim_data_pnw)
 
-modelBC_rcp85_year70 <- brick(modelBC_rcp85_year70)
-names(modelBC_rcp85_year70) <- names(bioclim_data_pnw)
+forecast_ssp585_year70 <- brick(forecast_ssp585_year70)
+names(forecast_ssp585_year70) <- names(bioclim_data_pnw)
 
 
-#RCP 26 year 50
-forecast_presence_aa_26_50 <- dismo::predict(object = bc_model_aa,
-                                             x = modelBC_rcp26_year50,
+#SSP 126 year 50
+forecast_presence_aa_126_50 <- dismo::predict(object = model_aa,
+                                             x = forecast_ssp126_year50,
                                              ext = geographic_extent_pnw)
+
 
 plot(wrld_simpl,
      xlim = c(min_lon_pnw, max_lon_pnw),
@@ -287,7 +286,7 @@ plot(wrld_simpl,
      axes = TRUE,
      col = "grey95")
 
-plot(forecast_presence_aa_26_50, add = TRUE)
+plot(forecast_presence_aa_126_50, add = TRUE)
 
 plot(wrld_simpl, add=TRUE, border = "grey5")
 
@@ -309,7 +308,7 @@ plot(wrld_simpl,
      col = "grey95")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_aa_26_50 > bc_threshold_aa, 
+plot(forecast_presence_aa_126_50 > threshold_aa, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#E7298A"))
@@ -319,9 +318,9 @@ plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
 
 
-#RCP 26 year 70
-forecast_presence_aa_26_70 <- dismo::predict(object = bc_model_aa,
-                                             x = modelBC_rcp26_year70,
+#SSP 126 year 70
+forecast_presence_aa_126_70 <- dismo::predict(object = model_aa,
+                                             x = forecast_ssp126_year70,
                                              ext = geographic_extent_pnw)
 
 plot(wrld_simpl,
@@ -330,7 +329,7 @@ plot(wrld_simpl,
      axes = TRUE,
      col = "grey95")
 
-plot(forecast_presence_aa_26_70, add = TRUE)
+plot(forecast_presence_aa_126_70, add = TRUE)
 
 plot(wrld_simpl, add=TRUE, border = "grey5")
 
@@ -352,7 +351,7 @@ plot(wrld_simpl,
      col = "grey95")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_aa_26_70 > bc_threshold_aa, 
+plot(forecast_presence_aa_126_70 > threshold_aa, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#E7298A"))
@@ -362,9 +361,9 @@ plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
 
 
-#RCP 85 year 50
-forecast_presence_aa_85_50 <- dismo::predict(object = bc_model_aa,
-                                             x = modelBC_rcp85_year50,
+#SSP 585 year 50
+forecast_presence_aa_585_50 <- dismo::predict(object = model_aa,
+                                             x = forecast_ssp585_year50,
                                              ext = geographic_extent_pnw)
 
 plot(wrld_simpl,
@@ -373,7 +372,7 @@ plot(wrld_simpl,
      axes = TRUE,
      col = "grey95")
 
-plot(forecast_presence_aa_85_50, add = TRUE)
+plot(forecast_presence_aa_585_50, add = TRUE)
 
 plot(wrld_simpl, add=TRUE, border = "grey5")
 
@@ -395,7 +394,7 @@ plot(wrld_simpl,
      col = "grey95")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_aa_85_50 > bc_threshold_aa, 
+plot(forecast_presence_aa_585_50 > threshold_aa, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#E7298A"))
@@ -405,9 +404,9 @@ plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
 
 
-#RCP 85 year 70
-forecast_presence_aa_85_70 <- dismo::predict(object = bc_model_aa,
-                                             x = modelBC_rcp85_year70,
+#SSP 585 year 70
+forecast_presence_aa_585_70 <- dismo::predict(object = model_aa,
+                                             x = forecast_ssp585_year70,
                                              ext = geographic_extent_pnw)
 
 plot(wrld_simpl,
@@ -416,7 +415,7 @@ plot(wrld_simpl,
      axes = TRUE,
      col = "grey95")
 
-plot(forecast_presence_aa_85_70, add = TRUE)
+plot(forecast_presence_aa_585_70, add = TRUE)
 
 plot(wrld_simpl, add=TRUE, border = "grey5")
 
@@ -438,7 +437,7 @@ plot(wrld_simpl,
      col = "grey95")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_aa_85_70 > bc_threshold_aa, 
+plot(forecast_presence_aa_585_70 > threshold_aa, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#E7298A"))
@@ -446,24 +445,24 @@ plot(forecast_presence_aa_85_70 > bc_threshold_aa,
 # Redraw those country borders
 plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
+
 
 
 
 #Plotting current and future
-
-par(mfrow=c(2,3))
+par(mfrow = c(3,2))
 
 #Panel 1
 # Plot base map
 plot(wrld_simpl, 
      xlim = c(min_lon_pnw, max_lon_pnw),
      ylim = c(min_lat_pnw, max_lat_pnw),
-     axes = TRUE, 
+     axes = TRUE,
      col = "grey95",
      main = "Current Predicted Landscape Suitability")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(predict_presence_aa > bc_threshold_aa, 
+plot(predict_presence_aa > threshold_aa, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#E7298A"))
@@ -471,46 +470,9 @@ plot(predict_presence_aa > bc_threshold_aa,
 # Redraw those country borders
 plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
+
 
 #Panel 2
-# Plot base map
-plot(wrld_simpl, 
-     xlim = c(min_lon_pnw, max_lon_pnw),
-     ylim = c(min_lat_pnw, max_lat_pnw),
-     axes = TRUE, 
-     col = "grey95",
-     main = "Forecast: RCP 26 Year 2050")
-
-# Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_aa_26_50 > bc_threshold_aa, 
-     add = TRUE, 
-     legend = FALSE, 
-     col = c(NA, "#E7298A"))
-
-# Redraw those country borders
-plot(wrld_simpl, add = TRUE, border = "grey5")
-box()
-
-#Panel 3
-# Plot base map
-plot(wrld_simpl, 
-     xlim = c(min_lon_pnw, max_lon_pnw),
-     ylim = c(min_lat_pnw, max_lat_pnw),
-     axes = TRUE, 
-     col = "grey95",
-     main = "Forecast: RCP 26 Year 2070")
-
-# Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_aa_26_70 > bc_threshold_aa, 
-     add = TRUE, 
-     legend = FALSE, 
-     col = c(NA, "#E7298A"))
-
-# Redraw those country borders
-plot(wrld_simpl, add = TRUE, border = "grey5")
-box()
-
-#Panel 4
 # Plot base map
 plot(wrld_simpl, 
      xlim = c(min_lon_pnw, max_lon_pnw),
@@ -530,6 +492,46 @@ points(x = latlon_aa$decimalLongitude,
 plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
 
+plot_gbifobs <- recordPlot()
+
+#Panel 3
+# Plot base map
+plot(wrld_simpl, 
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE, 
+     col = "grey95",
+     main = "Forecast: SSP 126 Year 2050")
+
+# Only plot areas where probability of occurrence is greater than the threshold
+plot(forecast_presence_aa_126_50 > threshold_aa, 
+     add = TRUE, 
+     legend = FALSE, 
+     col = c(NA, "#E7298A"))
+
+# Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+box()
+
+#Panel 4
+# Plot base map
+plot(wrld_simpl, 
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE, 
+     col = "grey95",
+     main = "Forecast: SSP 126 Year 2070")
+
+# Only plot areas where probability of occurrence is greater than the threshold
+plot(forecast_presence_aa_126_70 > threshold_aa, 
+     add = TRUE, 
+     legend = FALSE, 
+     col = c(NA, "#E7298A"))
+
+# Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+box()
+
 
 #Panel 5
 # Plot base map
@@ -538,10 +540,10 @@ plot(wrld_simpl,
      ylim = c(min_lat_pnw, max_lat_pnw),
      axes = TRUE, 
      col = "grey95",
-     main = "Forecast: RCP 85 Year 2050")
+     main = "Forecast: SSP 585 Year 2050")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_aa_85_50 > bc_threshold_aa, 
+plot(forecast_presence_aa_585_50 > threshold_aa, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#E7298A"))
@@ -557,10 +559,10 @@ plot(wrld_simpl,
      ylim = c(min_lat_pnw, max_lat_pnw),
      axes = TRUE, 
      col = "grey95",
-     main = "Forecast: RCP 85 Year 2070")
+     main = "Forecast: SSP 585 Year 2070")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_aa_85_70 > bc_threshold_aa, 
+plot(forecast_presence_aa_585_70 > threshold_aa, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#E7298A"))
@@ -571,12 +573,103 @@ box()
 
 
 
+##density plots for lat/lon distribution
+
+aa_currentpa <- predict_presence_aa>bc_threshold_aa 
+aa_currentpapoints <- rasterToPoints(aa_currentpa, function(x)x==1)
+
+aa_pa2650 <- forecast_presence_aa_26_50 > bc_threshold_aa 
+aa_pa2650points <- rasterToPoints(aa_pa2650, function(x)x==1)
+
+aa_pa2670 <- forecast_presence_aa_26_70 > bc_threshold_aa 
+aa_pa2670points <- rasterToPoints(aa_pa2670, function(x)x==1)
+
+aa_pa8550 <- forecast_presence_aa_85_50 > bc_threshold_aa 
+aa_pa8550points <- rasterToPoints(aa_pa8550, function(x)x==1)
+
+aa_pa8570 <- forecast_presence_aa_85_70 > bc_threshold_aa 
+aa_pa8570points <- rasterToPoints(aa_pa8570, function(x)x==1)
+
+ggplot() +
+  geom_density(
+    aes(aa_currentpapoints[,2],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(aa_pa2650points[,2],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(aa_pa2670points[,2],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Longitudinal Distribution of A. alnifolia under SSP126") +
+  xlab("Longitude")+
+  theme_light()
+    
+ggplot() +
+  geom_density(
+    aes(y = aa_currentpapoints[,1],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(y = aa_pa2650points[,1],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(y = aa_pa2670points[,1],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Latitudinal Distribution of A. alnifolia under SSP126") +
+  ylab("Latitude")+
+  theme_light()
 
 
+ggplot() +
+  geom_density(
+    aes(aa_currentpapoints[,2],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(aa_pa8550points[,2],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(aa_pa8570points[,2],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Longitudinal Distribution of A. alnifolia under SSP585") +
+  xlab("Longitude")+
+  theme_light()
 
-
-
-
+ggplot() +
+  geom_density(
+    aes(y = aa_currentpapoints[,1],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(y = aa_pa8550points[,1],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(y = aa_pa8570points[,1],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Latitudinal Distribution of A. alnifolia under SSP585") +
+  ylab("Latitude")+
+  theme_light()
 
 
 
@@ -602,10 +695,10 @@ title(main = "R. lasiococcus observations")
 
 
 #Clip climateNA data to geographic extent
-bc_model_rl <- bioclim(x = bioclim_data_pnw, p=latlon_rl)
+model_rl <- bioclim(x = bioclim_data_pnw, p=latlon_rl)
 
 #Predict presence from model
-predict_presence_rl <- dismo::predict(object = bc_model_rl,
+predict_presence_rl <- dismo::predict(object = model_rl,
                                       x = bioclim_data_pnw,
                                       ext = geographic_extent_pnw)
 
@@ -681,21 +774,21 @@ background_test_rl <- background_rl[group_background_rl == testing_group_rl, ]
 ##Training and testing the model
 
 # Build a model using training data
-bc_model_rl <- bioclim(x= bioclim_data_pnw, p = presence_train_rl)
+model_rl <- bioclim(x= bioclim_data_pnw, p = presence_train_rl)
 
 # Predict presence from model (same as previously, but with the update model)
-predict_presence_rl <- dismo::predict(object = bc_model_rl, 
+predict_presence_rl <- dismo::predict(object = model_rl, 
                                       x = bioclim_data_pnw, 
                                       ext = geographic_extent_pnw)
 
 # Use testing data for model evaluation
-bc_eval_rl <- evaluate(p = presence_test_rl,   # The presence testing data
+eval_rl <- evaluate(p = presence_test_rl,   # The presence testing data
                        a = background_test_rl, # The absence testing data
-                       model = bc_model_rl,    # The model we are evaluating
+                       model = model_rl,    # The model we are evaluating
                        x = bioclim_data_pnw)    # Climatic variables for use by model
 
 # Determine minimum threshold for "presence"
-bc_threshold_rl <- threshold(x = bc_eval_rl, stat = "spec_sens")
+threshold_rl <- threshold(x = eval_rl, stat = "spec_sens")
 
 #We want to use the threshold to paint a map with the predicted range:
 # Plot base map
@@ -707,7 +800,7 @@ plot(wrld_simpl,
      main = "Predicted Landscape Suitability to R. lasiococcus")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(predict_presence_rl > bc_threshold_rl, 
+plot(predict_presence_rl > threshold_rl, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#1B9E77"))
@@ -726,9 +819,9 @@ box()
 
 ##Predictions
 
-#RCP 26 year 50
-forecast_presence_rl_26_50 <- dismo::predict(object = bc_model_rl,
-                                             x = modelBC_rcp26_year50,
+#SSP 126 year 50
+forecast_presence_rl_126_50 <- dismo::predict(object = model_rl,
+                                             x = forecast_ssp126_year50,
                                              ext = geographic_extent_pnw)
 
 plot(wrld_simpl,
@@ -737,7 +830,7 @@ plot(wrld_simpl,
      axes = TRUE,
      col = "grey95")
 
-plot(forecast_presence_rl_26_50, add = TRUE)
+plot(forecast_presence_rl_126_50, add = TRUE)
 
 plot(wrld_simpl, add=TRUE, border = "grey5")
 
@@ -759,7 +852,7 @@ plot(wrld_simpl,
      col = "grey95")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_rl_26_50 > bc_threshold_rl, 
+plot(forecast_presence_rl_126_50 > threshold_rl, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#1B9E77"))
@@ -770,8 +863,8 @@ box()
 
 
 #RCP 26 year 70
-forecast_presence_rl_26_70 <- dismo::predict(object = bc_model_rl,
-                                             x = modelBC_rcp26_year70,
+forecast_presence_rl_126_70 <- dismo::predict(object = model_rl,
+                                             x = forecast_ssp126_year70,
                                              ext = geographic_extent_pnw)
 
 plot(wrld_simpl,
@@ -780,7 +873,7 @@ plot(wrld_simpl,
      axes = TRUE,
      col = "grey95")
 
-plot(forecast_presence_rl_26_70, add = TRUE)
+plot(forecast_presence_rl_126_70, add = TRUE)
 
 plot(wrld_simpl, add=TRUE, border = "grey5")
 
@@ -802,7 +895,7 @@ plot(wrld_simpl,
      col = "grey95")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_rl_26_70 > bc_threshold_rl, 
+plot(forecast_presence_rl_126_70 > threshold_rl, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#1B9E77"))
@@ -813,8 +906,8 @@ box()
 
 
 #RCP 85 year 50
-forecast_presence_rl_85_50 <- dismo::predict(object = bc_model_rl,
-                                             x = modelBC_rcp85_year50,
+forecast_presence_rl_585_50 <- dismo::predict(object = model_rl,
+                                             x = forecast_ssp585_year50,
                                              ext = geographic_extent_pnw)
 
 plot(wrld_simpl,
@@ -823,7 +916,7 @@ plot(wrld_simpl,
      axes = TRUE,
      col = "grey95")
 
-plot(forecast_presence_rl_85_50, add = TRUE)
+plot(forecast_presence_rl_585_50, add = TRUE)
 
 plot(wrld_simpl, add=TRUE, border = "grey5")
 
@@ -845,7 +938,7 @@ plot(wrld_simpl,
      col = "grey95")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_rl_85_50 > bc_threshold_rl, 
+plot(forecast_presence_rl_585_50 > threshold_rl, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#1B9E77"))
@@ -856,8 +949,8 @@ box()
 
 
 #RCP 85 year 70
-forecast_presence_rl_85_70 <- dismo::predict(object = bc_model_rl,
-                                             x = modelBC_rcp85_year70,
+forecast_presence_rl_585_70 <- dismo::predict(object = model_rl,
+                                             x = forecast_ssp585_year70,
                                              ext = geographic_extent_pnw)
 
 plot(wrld_simpl,
@@ -866,7 +959,7 @@ plot(wrld_simpl,
      axes = TRUE,
      col = "grey95")
 
-plot(forecast_presence_rl_85_70, add = TRUE)
+plot(forecast_presence_rl_585_70, add = TRUE)
 
 plot(wrld_simpl, add=TRUE, border = "grey5")
 
@@ -888,7 +981,7 @@ plot(wrld_simpl,
      col = "grey95")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_rl_85_70 > bc_threshold_rl, 
+plot(forecast_presence_rl_585_70 > threshold_rl, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#1B9E77"))
@@ -901,7 +994,7 @@ box()
 
 #Plotting current and future
 
-par(mfrow=c(2,3))
+par(mfrow=c(3,2))
 
 #Panel 1
 # Plot base map
@@ -913,7 +1006,7 @@ plot(wrld_simpl,
      main = "Current Predicted Landscape Suitability")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(predict_presence_rl > bc_threshold_rl, 
+plot(predict_presence_rl > threshold_rl, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#1B9E77"))
@@ -923,44 +1016,6 @@ plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
 
 #Panel 2
-# Plot base map
-plot(wrld_simpl, 
-     xlim = c(min_lon_pnw, max_lon_pnw),
-     ylim = c(min_lat_pnw, max_lat_pnw),
-     axes = TRUE, 
-     col = "grey95",
-     main = "Forecast: RCP 26 Year 2050")
-
-# Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_rl_26_50 > bc_threshold_rl, 
-     add = TRUE, 
-     legend = FALSE, 
-     col = c(NA, "#1B9E77"))
-
-# Redraw those country borders
-plot(wrld_simpl, add = TRUE, border = "grey5")
-box()
-
-#Panel 3
-# Plot base map
-plot(wrld_simpl, 
-     xlim = c(min_lon_pnw, max_lon_pnw),
-     ylim = c(min_lat_pnw, max_lat_pnw),
-     axes = TRUE, 
-     col = "grey95",
-     main = "Forecast: RCP 26 Year 2070")
-
-# Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_rl_26_70 > bc_threshold_rl, 
-     add = TRUE, 
-     legend = FALSE, 
-     col = c(NA, "#1B9E77"))
-
-# Redraw those country borders
-plot(wrld_simpl, add = TRUE, border = "grey5")
-box()
-
-#Panel 4
 # Plot base map
 plot(wrld_simpl, 
      xlim = c(min_lon_pnw, max_lon_pnw),
@@ -981,6 +1036,45 @@ plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
 
 
+#Panel 3
+# Plot base map
+plot(wrld_simpl, 
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE, 
+     col = "grey95",
+     main = "Forecast: SSP 126 Year 2050")
+
+# Only plot areas where probability of occurrence is greater than the threshold
+plot(forecast_presence_rl_126_50 > threshold_rl, 
+     add = TRUE, 
+     legend = FALSE, 
+     col = c(NA, "#1B9E77"))
+
+# Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+box()
+
+#Panel 4
+# Plot base map
+plot(wrld_simpl, 
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE, 
+     col = "grey95",
+     main = "Forecast: SSP 126 Year 2070")
+
+# Only plot areas where probability of occurrence is greater than the threshold
+plot(forecast_presence_rl_126_70 > threshold_rl, 
+     add = TRUE, 
+     legend = FALSE, 
+     col = c(NA, "#1B9E77"))
+
+# Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+box()
+
+
 #Panel 5
 # Plot base map
 plot(wrld_simpl, 
@@ -988,10 +1082,10 @@ plot(wrld_simpl,
      ylim = c(min_lat_pnw, max_lat_pnw),
      axes = TRUE, 
      col = "grey95",
-     main = "Forecast: RCP 85 Year 2050")
+     main = "Forecast: SSP 585 Year 2050")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_rl_85_50 > bc_threshold_rl, 
+plot(forecast_presence_rl_585_50 > threshold_rl, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#1B9E77"))
@@ -1007,10 +1101,10 @@ plot(wrld_simpl,
      ylim = c(min_lat_pnw, max_lat_pnw),
      axes = TRUE, 
      col = "grey95",
-     main = "Forecast: RCP 85 Year 2070")
+     main = "Forecast: SSP 585 Year 2070")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_rl_85_70 > bc_threshold_rl, 
+plot(forecast_presence_rl_585_70 > threshold_rl, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#1B9E77"))
@@ -1021,13 +1115,103 @@ box()
 
 
 
+##density plots for lat/lon distribution
+
+rl_currentpa <- predict_presence_rl>threshold_rl 
+rl_currentpapoints <- rasterToPoints(rl_currentpa, function(x)x==1)
+
+rl_pa2650 <- forecast_presence_rl_126_50 > threshold_rl 
+rl_pa2650points <- rasterToPoints(rl_pa2650, function(x)x==1)
+
+rl_pa2670 <- forecast_presence_rl_126_70 > threshold_rl 
+rl_pa2670points <- rasterToPoints(rl_pa2670, function(x)x==1)
+
+rl_pa8550 <- forecast_presence_rl_585_50 > threshold_rl 
+rl_pa8550points <- rasterToPoints(rl_pa8550, function(x)x==1)
+
+rl_pa8570 <- forecast_presence_rl_585_70 > threshold_rl 
+rl_pa8570points <- rasterToPoints(rl_pa8570, function(x)x==1)
+
+ggplot() +
+  geom_density(
+    aes(rl_currentpapoints[,2],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(rl_pa2650points[,2],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(rl_pa2670points[,2],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Longitudinal Distribution of R. lasiococcus under SSP126") +
+  xlab("Longitude")+
+  theme_light()
+
+ggplot() +
+  geom_density(
+    aes(y = rl_currentpapoints[,1],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(y = rl_pa2650points[,1],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(y = rl_pa2670points[,1],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Latitudinal Distribution of R. lasiococcus under SSP126") +
+  ylab("Latitude")+
+  theme_light()
 
 
+ggplot() +
+  geom_density(
+    aes(rl_currentpapoints[,2],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(rl_pa8550points[,2],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(rl_pa8570points[,2],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Longitudinal Distribution of R. lasiococcus under SSP585") +
+  xlab("Longitude")+
+  theme_light()
 
-
-
-
-
+ggplot() +
+  geom_density(
+    aes(y = rl_currentpapoints[,1],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(y = rl_pa8550points[,1],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(y = rl_pa8570points[,1],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Latitudinal Distribution of R. lasiococcus under SSP585") +
+  ylab("Latitude")+
+  theme_light()
 
 
 
@@ -1053,10 +1237,10 @@ box()
 title(main = "R. nivalis observations")
 
 #Model with just presence data
-bc_model_rn <- bioclim(x = bioclim_data_pnw, p=latlon_rn)
+model_rn <- bioclim(x = bioclim_data_pnw, p=latlon_rn)
 
 #Predict presence from model
-predict_presence_rn <- dismo::predict(object = bc_model_rn,
+predict_presence_rn <- dismo::predict(object = model_rn,
                                       x = bioclim_data_pnw,
                                       ext = geographic_extent_pnw)
 
@@ -1132,21 +1316,21 @@ background_test_rn <- background_rn[group_background_rn == testing_group_rn, ]
 ##Training and testing the model
 
 # Build a model using training data
-bc_model_rn <- bioclim(x= bioclim_data_pnw, p = presence_train_rn)
+model_rn <- bioclim(x= bioclim_data_pnw, p = presence_train_rn)
 
 # Predict presence from model (same as previously, but with the update model)
-predict_presence_rn <- dismo::predict(object = bc_model_rn, 
+predict_presence_rn <- dismo::predict(object = model_rn, 
                                       x = bioclim_data_pnw, 
                                       ext = geographic_extent_pnw)
 
 # Use testing data for model evaluation
-bc_eval_rn <- evaluate(p = presence_test_rn,   # The presence testing data
+eval_rn <- evaluate(p = presence_test_rn,   # The presence testing data
                        a = background_test_rn, # The absence testing data
-                       model = bc_model_rn,    # The model we are evaluating
+                       model = model_rn,    # The model we are evaluating
                        x = bioclim_data_pnw)    # Climatic variables for use by model
 
 # Determine minimum threshold for "presence"
-bc_threshold_rn <- threshold(x = bc_eval_rn, stat = "spec_sens")
+threshold_rn <- threshold(x = eval_rn, stat = "spec_sens")
 
 #We want to use the threshold to paint a map with the predicted range:
 # Plot base map
@@ -1158,7 +1342,7 @@ plot(wrld_simpl,
      main = "Predicted Landscape Suitability to R. nivalis")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(predict_presence_rn > bc_threshold_rn, 
+plot(predict_presence_rn > threshold_rn, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#D95F02"))
@@ -1177,9 +1361,9 @@ box()
 
 ##Predictions
 
-#RCP 26 year 50
-forecast_presence_rn_26_50 <- dismo::predict(object = bc_model_rn,
-                                             x = modelBC_rcp26_year50,
+#SSP 126 year 50
+forecast_presence_rn_126_50 <- dismo::predict(object = model_rn,
+                                             x = forecast_ssp126_year50,
                                              ext = geographic_extent_pnw)
 
 plot(wrld_simpl,
@@ -1188,7 +1372,7 @@ plot(wrld_simpl,
      axes = TRUE,
      col = "grey95")
 
-plot(forecast_presence_rn_26_50, add = TRUE)
+plot(forecast_presence_rn_126_50, add = TRUE)
 
 plot(wrld_simpl, add=TRUE, border = "grey5")
 
@@ -1210,7 +1394,7 @@ plot(wrld_simpl,
      col = "grey95")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_rn_26_50 > bc_threshold_rn, 
+plot(forecast_presence_rn_126_50 > threshold_rn, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#D95F02"))
@@ -1220,9 +1404,9 @@ plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
 
 
-#RCP 26 year 70
-forecast_presence_rn_26_70 <- dismo::predict(object = bc_model_rn,
-                                             x = modelBC_rcp26_year70,
+#SSP 126 year 70
+forecast_presence_rn_126_70 <- dismo::predict(object = model_rn,
+                                             x = forecast_ssp126_year70,
                                              ext = geographic_extent_pnw)
 
 plot(wrld_simpl,
@@ -1231,7 +1415,7 @@ plot(wrld_simpl,
      axes = TRUE,
      col = "grey95")
 
-plot(forecast_presence_rn_26_70, add = TRUE)
+plot(forecast_presence_rn_126_70, add = TRUE)
 
 plot(wrld_simpl, add=TRUE, border = "grey5")
 
@@ -1253,7 +1437,7 @@ plot(wrld_simpl,
      col = "grey95")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_rn_26_70 > bc_threshold_rn, 
+plot(forecast_presence_rn_126_70 > threshold_rn, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#D95F02"))
@@ -1263,9 +1447,9 @@ plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
 
 
-#RCP 85 year 50
-forecast_presence_rn_85_50 <- dismo::predict(object = bc_model_rn,
-                                             x = modelBC_rcp85_year50,
+#SSP 585 year 50
+forecast_presence_rn_585_50 <- dismo::predict(object = model_rn,
+                                             x = forecast_ssp585_year50,
                                              ext = geographic_extent_pnw)
 
 plot(wrld_simpl,
@@ -1274,7 +1458,7 @@ plot(wrld_simpl,
      axes = TRUE,
      col = "grey95")
 
-plot(forecast_presence_rn_85_50, add = TRUE)
+plot(forecast_presence_rn_585_50, add = TRUE)
 
 plot(wrld_simpl, add=TRUE, border = "grey5")
 
@@ -1296,7 +1480,7 @@ plot(wrld_simpl,
      col = "grey95")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_rn_85_50 > bc_threshold_rn, 
+plot(forecast_presence_rn_585_50 > threshold_rn, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#D95F02"))
@@ -1306,9 +1490,9 @@ plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
 
 
-#RCP 85 year 70
-forecast_presence_rn_85_70 <- dismo::predict(object = bc_model_rn,
-                                             x = modelBC_rcp85_year70,
+#SSP 585 year 70
+forecast_presence_rn_585_70 <- dismo::predict(object = model_rn,
+                                             x = forecast_ssp585_year70,
                                              ext = geographic_extent_pnw)
 
 plot(wrld_simpl,
@@ -1317,7 +1501,7 @@ plot(wrld_simpl,
      axes = TRUE,
      col = "grey95")
 
-plot(forecast_presence_rn_85_70, add = TRUE)
+plot(forecast_presence_rn_585_70, add = TRUE)
 
 plot(wrld_simpl, add=TRUE, border = "grey5")
 
@@ -1339,7 +1523,7 @@ plot(wrld_simpl,
      col = "grey95")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_rn_85_70 > bc_threshold_rn, 
+plot(forecast_presence_rn_585_70 > threshold_rn, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#D95F02"))
@@ -1352,7 +1536,7 @@ box()
 
 #Plotting current and future
 
-par(mfrow=c(2,3))
+par(mfrow=c(3,2))
 
 #Panel 1
 # Plot base map
@@ -1364,7 +1548,7 @@ plot(wrld_simpl,
      main = "Current Predicted Landscape Suitability")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(predict_presence_rn > bc_threshold_rn, 
+plot(predict_presence_rn > threshold_rn, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#D95F02"))
@@ -1374,44 +1558,6 @@ plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
 
 #Panel 2
-# Plot base map
-plot(wrld_simpl, 
-     xlim = c(min_lon_pnw, max_lon_pnw),
-     ylim = c(min_lat_pnw, max_lat_pnw),
-     axes = TRUE, 
-     col = "grey95",
-     main = "Forecast: RCP 26 Year 2050")
-
-# Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_rn_26_50 > bc_threshold_rn, 
-     add = TRUE, 
-     legend = FALSE, 
-     col = c(NA, "#D95F02"))
-
-# Redraw those country borders
-plot(wrld_simpl, add = TRUE, border = "grey5")
-box()
-
-#Panel 3
-# Plot base map
-plot(wrld_simpl, 
-     xlim = c(min_lon_pnw, max_lon_pnw),
-     ylim = c(min_lat_pnw, max_lat_pnw),
-     axes = TRUE, 
-     col = "grey95",
-     main = "Forecast: RCP 26 Year 2070")
-
-# Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_rn_26_70 > bc_threshold_rn, 
-     add = TRUE, 
-     legend = FALSE, 
-     col = c(NA, "#D95F02"))
-
-# Redraw those country borders
-plot(wrld_simpl, add = TRUE, border = "grey5")
-box()
-
-#Panel 4
 # Plot base map
 plot(wrld_simpl, 
      xlim = c(min_lon_pnw, max_lon_pnw),
@@ -1431,6 +1577,43 @@ points(x = latlon_rl$decimalLongitude,
 plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
 
+#Panel 3
+# Plot base map
+plot(wrld_simpl, 
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE, 
+     col = "grey95",
+     main = "Forecast: SSP 126 Year 2050")
+
+# Only plot areas where probability of occurrence is greater than the threshold
+plot(forecast_presence_rn_126_50 > threshold_rn, 
+     add = TRUE, 
+     legend = FALSE, 
+     col = c(NA, "#D95F02"))
+
+# Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+box()
+
+#Panel 4
+# Plot base map
+plot(wrld_simpl, 
+     xlim = c(min_lon_pnw, max_lon_pnw),
+     ylim = c(min_lat_pnw, max_lat_pnw),
+     axes = TRUE, 
+     col = "grey95",
+     main = "Forecast: SSP 126 Year 2070")
+
+# Only plot areas where probability of occurrence is greater than the threshold
+plot(forecast_presence_rn_126_70 > threshold_rn, 
+     add = TRUE, 
+     legend = FALSE, 
+     col = c(NA, "#D95F02"))
+
+# Redraw those country borders
+plot(wrld_simpl, add = TRUE, border = "grey5")
+box()
 
 #Panel 5
 # Plot base map
@@ -1439,10 +1622,10 @@ plot(wrld_simpl,
      ylim = c(min_lat_pnw, max_lat_pnw),
      axes = TRUE, 
      col = "grey95",
-     main = "Forecast: RCP 85 Year 2050")
+     main = "Forecast: SSP 585 Year 2050")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_rn_85_50 > bc_threshold_rn, 
+plot(forecast_presence_rn_585_50 > threshold_rn, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#D95F02"))
@@ -1458,10 +1641,10 @@ plot(wrld_simpl,
      ylim = c(min_lat_pnw, max_lat_pnw),
      axes = TRUE, 
      col = "grey95",
-     main = "Forecast: RCP 85 Year 2070")
+     main = "Forecast: SSP 585 Year 2070")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_rn_85_70 > bc_threshold_rn, 
+plot(forecast_presence_rn_585_70 > threshold_rn, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#D95F02"))
@@ -1471,7 +1654,103 @@ plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
 
 
+##density plots for lat/lon distribution
 
+rn_currentpa <- predict_presence_rn>threshold_rn 
+rn_currentpapoints <- rasterToPoints(rn_currentpa, function(x)x==1)
+
+rn_pa2650 <- forecast_presence_rn_126_50 > threshold_rn 
+rn_pa2650points <- rasterToPoints(rn_pa2650, function(x)x==1)
+
+rn_pa2670 <- forecast_presence_rn_126_70 > threshold_rn 
+rn_pa2670points <- rasterToPoints(rn_pa2670, function(x)x==1)
+
+rn_pa8550 <- forecast_presence_rn_585_50 > threshold_rn 
+rn_pa8550points <- rasterToPoints(rn_pa8550, function(x)x==1)
+
+rn_pa8570 <- forecast_presence_rn_585_70 > threshold_rn 
+rn_pa8570points <- rasterToPoints(rn_pa8570, function(x)x==1)
+
+ggplot() +
+  geom_density(
+    aes(rn_currentpapoints[,2],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(rn_pa2650points[,2],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(rn_pa2670points[,2],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Longitudinal Distribution of R. nivalis under SSP126") +
+  xlab("Longitude")+
+  theme_light()
+
+ggplot() +
+  geom_density(
+    aes(y = rn_currentpapoints[,1],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(y = rn_pa2650points[,1],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(y = rn_pa2670points[,1],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Latitudinal Distribution of R. nivalis under SSP126") +
+  ylab("Latitude")+
+  theme_light()
+
+
+ggplot() +
+  geom_density(
+    aes(rn_currentpapoints[,2],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(rn_pa8550points[,2],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(rn_pa8570points[,2],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Longitudinal Distribution of R. nivalis under SSP585") +
+  xlab("Longitude")+
+  theme_light()
+
+ggplot() +
+  geom_density(
+    aes(y = rn_currentpapoints[,1],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(y = rn_pa8550points[,1],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(y = rn_pa8570points[,1],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Latitudinal Distribution of R. nivalis under SSP585") +
+  ylab("Latitude")+
+  theme_light()
 
 
 
@@ -1506,10 +1785,10 @@ box()
 title(main = "V. parvifolium observations")
 
 #Clip climateNA data to geographic extent
-bc_model_vp <- bioclim(x = bioclim_data_pnw, p=latlon_vp)
+model_vp <- bioclim(x = bioclim_data_pnw, p=latlon_vp)
 
 #Predict presence from model
-predict_presence_vp <- dismo::predict(object = bc_model_vp,
+predict_presence_vp <- dismo::predict(object = model_vp,
                                       x = bioclim_data_pnw,
                                       ext = geographic_extent_pnw)
 
@@ -1585,21 +1864,21 @@ background_test_vp <- background_vp[group_background_vp == testing_group_vp, ]
 ##Training and testing the model
 
 # Build a model using training data
-bc_model_vp <- bioclim(x= bioclim_data_pnw, p = presence_train_vp)
+model_vp <- bioclim(x= bioclim_data_pnw, p = presence_train_vp)
 
 # Predict presence from model (same as previously, but with the update model)
-predict_presence_vp <- dismo::predict(object = bc_model_vp, 
+predict_presence_vp <- dismo::predict(object = model_vp, 
                                       x = bioclim_data_pnw, 
                                       ext = geographic_extent_pnw)
 
 # Use testing data for model evaluation
-bc_eval_vp <- evaluate(p = presence_test_vp,   # The presence testing data
+eval_vp <- evaluate(p = presence_test_vp,   # The presence testing data
                        a = background_test_vp, # The absence testing data
-                       model = bc_model_vp,    # The model we are evaluating
+                       model = model_vp,    # The model we are evaluating
                        x = bioclim_data_pnw)    # Climatic variables for use by model
 
 # Determine minimum threshold for "presence"
-bc_threshold_vp <- threshold(x = bc_eval_vp, stat = "spec_sens")
+threshold_vp <- threshold(x = eval_vp, stat = "spec_sens")
 
 #We want to use the threshold to paint a map with the predicted range:
 # Plot base map
@@ -1611,7 +1890,7 @@ plot(wrld_simpl,
      main = "Predicted Landscape Suitability to V. parvifolium")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(predict_presence_vp > bc_threshold_vp, 
+plot(predict_presence_vp > threshold_vp, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#7570B3"))
@@ -1629,9 +1908,9 @@ box()
 
 ##Predictions
 
-#RCP 26 year 50
-forecast_presence_vp_26_50 <- dismo::predict(object = bc_model_vp,
-                                             x = modelBC_rcp26_year50,
+#SSP 126 year 50
+forecast_presence_vp_126_50 <- dismo::predict(object = model_vp,
+                                             x = forecast_ssp126_year50,
                                              ext = geographic_extent_pnw)
 
 plot(wrld_simpl,
@@ -1640,7 +1919,7 @@ plot(wrld_simpl,
      axes = TRUE,
      col = "grey95")
 
-plot(forecast_presence_vp_26_50, add = TRUE)
+plot(forecast_presence_vp_126_50, add = TRUE)
 
 plot(wrld_simpl, add=TRUE, border = "grey5")
 
@@ -1662,7 +1941,7 @@ plot(wrld_simpl,
      col = "grey95")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_vp_26_50 > bc_threshold_vp, 
+plot(forecast_presence_vp_126_50 > threshold_vp, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#7570B3"))
@@ -1672,9 +1951,9 @@ plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
 
 
-#RCP 26 year 70
-forecast_presence_vp_26_70 <- dismo::predict(object = bc_model_vp,
-                                             x = modelBC_rcp26_year70,
+#SSP 126 year 70
+forecast_presence_vp_126_70 <- dismo::predict(object = model_vp,
+                                             x = forecast_ssp126_year70,
                                              ext = geographic_extent_pnw)
 
 plot(wrld_simpl,
@@ -1683,7 +1962,7 @@ plot(wrld_simpl,
      axes = TRUE,
      col = "grey95")
 
-plot(forecast_presence_vp_26_70, add = TRUE)
+plot(forecast_presence_vp_126_70, add = TRUE)
 
 plot(wrld_simpl, add=TRUE, border = "grey5")
 
@@ -1705,7 +1984,7 @@ plot(wrld_simpl,
      col = "grey95")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_vp_26_70 > bc_threshold_vp, 
+plot(forecast_presence_vp_126_70 > threshold_vp, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#7570B3"))
@@ -1716,8 +1995,8 @@ box()
 
 
 #RCP 85 year 50
-forecast_presence_vp_85_50 <- dismo::predict(object = bc_model_vp,
-                                             x = modelBC_rcp85_year50,
+forecast_presence_vp_585_50 <- dismo::predict(object = model_vp,
+                                             x = forecast_ssp585_year50,
                                              ext = geographic_extent_pnw)
 
 plot(wrld_simpl,
@@ -1726,7 +2005,7 @@ plot(wrld_simpl,
      axes = TRUE,
      col = "grey95")
 
-plot(forecast_presence_vp_85_50, add = TRUE)
+plot(forecast_presence_vp_585_50, add = TRUE)
 
 plot(wrld_simpl, add=TRUE, border = "grey5")
 
@@ -1748,7 +2027,7 @@ plot(wrld_simpl,
      col = "grey95")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_vp_85_50 > bc_threshold_vp, 
+plot(forecast_presence_vp_585_50 > threshold_vp, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#7570B3"))
@@ -1758,9 +2037,9 @@ plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
 
 
-#RCP 85 year 70
-forecast_presence_vp_85_70 <- dismo::predict(object = bc_model_vp,
-                                             x = modelBC_rcp85_year70,
+#SSP 585 year 70
+forecast_presence_vp_585_70 <- dismo::predict(object = model_vp,
+                                             x = forecast_ssp585_year70,
                                              ext = geographic_extent_pnw)
 
 plot(wrld_simpl,
@@ -1769,7 +2048,7 @@ plot(wrld_simpl,
      axes = TRUE,
      col = "grey95")
 
-plot(forecast_presence_vp_85_70, add = TRUE)
+plot(forecast_presence_vp_585_70, add = TRUE)
 
 plot(wrld_simpl, add=TRUE, border = "grey5")
 
@@ -1791,7 +2070,7 @@ plot(wrld_simpl,
      col = "grey95")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_vp_85_70 > bc_threshold_vp, 
+plot(forecast_presence_vp_585_70 > threshold_vp, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#7570B3"))
@@ -1804,7 +2083,7 @@ box()
 
 #Plotting current and future
 
-par(mfrow=c(2,3))
+par(mfrow=c(3,2))
 
 #Panel 1
 # Plot base map
@@ -1832,17 +2111,19 @@ plot(wrld_simpl,
      ylim = c(min_lat_pnw, max_lat_pnw),
      axes = TRUE, 
      col = "grey95",
-     main = "Forecast: RCP 26 Year 2050")
+     main = "GBIF species observations")
 
-# Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_vp_26_50 > bc_threshold_vp, 
-     add = TRUE, 
-     legend = FALSE, 
-     col = c(NA, "#7570B3"))
+#Plotting point observations
+points(x = latlon_vp$decimalLongitude,
+       y = latlon_vp$decimalLatitude,
+       col = "#7570B3",
+       pch = 20,
+       cex = 0.4)
 
 # Redraw those country borders
 plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
+
 
 #Panel 3
 # Plot base map
@@ -1851,10 +2132,10 @@ plot(wrld_simpl,
      ylim = c(min_lat_pnw, max_lat_pnw),
      axes = TRUE, 
      col = "grey95",
-     main = "Forecast: RCP 26 Year 2070")
+     main = "Forecast: SSP 126 Year 2050")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_vp_26_70 > bc_threshold_vp, 
+plot(forecast_presence_vp_126_50 > threshold_vp, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#7570B3"))
@@ -1870,19 +2151,17 @@ plot(wrld_simpl,
      ylim = c(min_lat_pnw, max_lat_pnw),
      axes = TRUE, 
      col = "grey95",
-     main = "GBIF species observations")
+     main = "Forecast: SSP 126 Year 2070")
 
-#Plotting point observations
-points(x = latlon_vp$decimalLongitude,
-       y = latlon_vp$decimalLatitude,
-       col = "#7570B3",
-       pch = 20,
-       cex = 0.4)
+# Only plot areas where probability of occurrence is greater than the threshold
+plot(forecast_presence_vp_126_70 > threshold_vp, 
+     add = TRUE, 
+     legend = FALSE, 
+     col = c(NA, "#7570B3"))
 
 # Redraw those country borders
 plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
-
 
 #Panel 5
 # Plot base map
@@ -1891,10 +2170,10 @@ plot(wrld_simpl,
      ylim = c(min_lat_pnw, max_lat_pnw),
      axes = TRUE, 
      col = "grey95",
-     main = "Forecast: RCP 85 Year 2050")
+     main = "Forecast: SSP 585 Year 2050")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_vp_85_50 > bc_threshold_vp, 
+plot(forecast_presence_vp_585_50 > threshold_vp, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#7570B3"))
@@ -1910,10 +2189,10 @@ plot(wrld_simpl,
      ylim = c(min_lat_pnw, max_lat_pnw),
      axes = TRUE, 
      col = "grey95",
-     main = "Forecast: RCP 85 Year 2070")
+     main = "Forecast: SSP 585 Year 2070")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(forecast_presence_vp_85_70 > bc_threshold_vp, 
+plot(forecast_presence_vp_585_70 > threshold_vp, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#7570B3"))
@@ -1921,4 +2200,104 @@ plot(forecast_presence_vp_85_70 > bc_threshold_vp,
 # Redraw those country borders
 plot(wrld_simpl, add = TRUE, border = "grey5")
 box()
+
+##density plots for lat/lon distribution
+
+vp_currentpa <- predict_presence_vp>threshold_vp 
+vp_currentpapoints <- rasterToPoints(vp_currentpa, function(x)x==1)
+
+vp_pa2650 <- forecast_presence_vp_126_50 > threshold_vp 
+vp_pa2650points <- rasterToPoints(vp_pa2650, function(x)x==1)
+
+vp_pa2670 <- forecast_presence_vp_126_70 > threshold_vp 
+vp_pa2670points <- rasterToPoints(vp_pa2670, function(x)x==1)
+
+vp_pa8550 <- forecast_presence_vp_585_50 > threshold_vp 
+vp_pa8550points <- rasterToPoints(vp_pa8550, function(x)x==1)
+
+vp_pa8570 <- forecast_presence_vp_585_70 > threshold_vp 
+vp_pa8570points <- rasterToPoints(vp_pa8570, function(x)x==1)
+
+ggplot() +
+  geom_density(
+    aes(vp_currentpapoints[,2],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(vp_pa2650points[,2],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(vp_pa2670points[,2],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Longitudinal Distribution of V. parvifolium under SSP126") +
+  xlab("Longitude")+
+  theme_light()
+
+ggplot() +
+  geom_density(
+    aes(y = vp_currentpapoints[,1],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(y = vp_pa2650points[,1],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(y = vp_pa2670points[,1],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Latitudinal Distribution of V. parvifolium under SSP126") +
+  ylab("Latitude")+
+  theme_light()
+
+
+ggplot() +
+  geom_density(
+    aes(vp_currentpapoints[,2],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(vp_pa8550points[,2],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(vp_pa8570points[,2],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Longitudinal Distribution of V. parvifolium under SSP585") +
+  xlab("Longitude")+
+  theme_light()
+
+ggplot() +
+  geom_density(
+    aes(y = vp_currentpapoints[,1],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(y = vp_pa8550points[,1],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(y = vp_pa8570points[,1],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Latitudinal Distribution of V. parvifolium under SSP585") +
+  ylab("Latitude")+
+  theme_light()
+
+
 
