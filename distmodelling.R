@@ -77,6 +77,59 @@ data(wrld_simpl)
 #Setting the seed for random number generator
 set.seed(20230227)
 
+#CMIP6
+#SSP 126 is lowest emissions scenario, SSP 585 is highest emissions scenario)
+#using model "MRI-ESM2-0" based on evaluation from this paper: https://link.springer.com/article/10.1007/s00382-022-06410-1
+
+#Climate data
+forecast_ssp126_year50 <- cmip6_world(model = "MRI-ESM2-0",
+                                      ssp = "126",
+                                      time = "2041-2060",
+                                      var = "bioc",
+                                      res = 2.5,
+                                      path = here("data"))
+
+forecast_ssp126_year70 <- cmip6_world(model = "MRI-ESM2-0",
+                                      ssp = "126",
+                                      time = "2061-2080",
+                                      var = "bioc",
+                                      res = 2.5,
+                                      path = here("data"))
+
+forecast_ssp585_year50 <- cmip6_world(model = "MRI-ESM2-0",
+                                      ssp = "585",
+                                      time = "2041-2060",
+                                      var = "bioc",
+                                      res = 2.5,
+                                      path = here("data"))
+
+forecast_ssp585_year70 <- cmip6_world(model = "MRI-ESM2-0",
+                                      ssp = "585",
+                                      time = "2061-2080",
+                                      var = "bioc",
+                                      res = 2.5,
+                                      path = here("data"))
+
+# DON'T PUSH THIS DOWNLOAD, TOO BIG FOR GITHUB
+
+#Getting all the climate versions in the right format 
+
+forecast_ssp126_year50 <- brick(forecast_ssp126_year50)
+names(forecast_ssp126_year50) <- names(bioclim_data_pnw)
+
+forecast_ssp126_year70 <- brick(forecast_ssp126_year70)
+names(forecast_ssp126_year70) <- names(bioclim_data_pnw)
+
+forecast_ssp585_year50 <- brick(forecast_ssp585_year50)
+names(forecast_ssp585_year50) <- names(bioclim_data_pnw)
+
+forecast_ssp585_year70 <- brick(forecast_ssp585_year70)
+names(forecast_ssp585_year70) <- names(bioclim_data_pnw)
+
+
+
+
+
 
 #####Mapping A. alnifolia
 
@@ -93,6 +146,7 @@ points(x = obs_aa$decimalLongitude,
        col = "#E7298A",
        pch = 20, 
        cex = 0.5)
+
 box()
 title(main = "A. alnifolia observations")
 
@@ -223,56 +277,6 @@ box()
 
 
 #Next: forecasting distributions.
-#CMIP6
-#SSP 126 is lowest emissions scenario, SSP 585 is highest emissions scenario)
-#using model "MRI-ESM2-0" based on evaluation from this paper: https://link.springer.com/article/10.1007/s00382-022-06410-1
-
-
-#Climate data
-forecast_ssp126_year50 <- cmip6_world(model = "MRI-ESM2-0",
-                                    ssp = "126",
-                                    time = "2041-2060",
-                                    var = "bioc",
-                                    res = 2.5,
-                                    path = here("data"))
-
-forecast_ssp126_year70 <- cmip6_world(model = "MRI-ESM2-0",
-                                    ssp = "126",
-                                    time = "2061-2080",
-                                    var = "bioc",
-                                    res = 2.5,
-                                    path = here("data"))
-
-forecast_ssp585_year50 <- cmip6_world(model = "MRI-ESM2-0",
-                                    ssp = "585",
-                                    time = "2041-2060",
-                                    var = "bioc",
-                                    res = 2.5,
-                                    path = here("data"))
-
-forecast_ssp585_year70 <- cmip6_world(model = "MRI-ESM2-0",
-                                    ssp = "585",
-                                    time = "2061-2080",
-                                    var = "bioc",
-                                    res = 2.5,
-                                    path = here("data"))
-
-# DON'T PUSH THIS DOWNLOAD, TOO BIG FOR GITHUB
-
-#Getting all the climate versions in the right format 
-
-forecast_ssp126_year50 <- brick(forecast_ssp126_year50)
-names(forecast_ssp126_year50) <- names(bioclim_data_pnw)
-
-forecast_ssp126_year70 <- brick(forecast_ssp126_year70)
-names(forecast_ssp126_year70) <- names(bioclim_data_pnw)
-
-forecast_ssp585_year50 <- brick(forecast_ssp585_year50)
-names(forecast_ssp585_year50) <- names(bioclim_data_pnw)
-
-forecast_ssp585_year70 <- brick(forecast_ssp585_year70)
-names(forecast_ssp585_year70) <- names(bioclim_data_pnw)
-
 
 #SSP 126 year 50
 forecast_presence_aa_126_50 <- dismo::predict(object = model_aa,
@@ -575,101 +579,104 @@ box()
 
 ##density plots for lat/lon distribution
 
-aa_currentpa <- predict_presence_aa>bc_threshold_aa 
+aa_currentpa <- predict_presence_aa>threshold_aa 
 aa_currentpapoints <- rasterToPoints(aa_currentpa, function(x)x==1)
 
-aa_pa2650 <- forecast_presence_aa_26_50 > bc_threshold_aa 
-aa_pa2650points <- rasterToPoints(aa_pa2650, function(x)x==1)
+aa_pa12650 <- forecast_presence_aa_126_50 > threshold_aa 
+aa_pa12650points <- rasterToPoints(aa_pa12650, function(x)x==1)
 
-aa_pa2670 <- forecast_presence_aa_26_70 > bc_threshold_aa 
-aa_pa2670points <- rasterToPoints(aa_pa2670, function(x)x==1)
+aa_pa12670 <- forecast_presence_aa_126_70 > threshold_aa 
+aa_pa12670points <- rasterToPoints(aa_pa12670, function(x)x==1)
 
-aa_pa8550 <- forecast_presence_aa_85_50 > bc_threshold_aa 
-aa_pa8550points <- rasterToPoints(aa_pa8550, function(x)x==1)
+aa_pa58550 <- forecast_presence_aa_585_50 > threshold_aa 
+aa_pa58550points <- rasterToPoints(aa_pa58550, function(x)x==1)
 
-aa_pa8570 <- forecast_presence_aa_85_70 > bc_threshold_aa 
-aa_pa8570points <- rasterToPoints(aa_pa8570, function(x)x==1)
+aa_pa58570 <- forecast_presence_aa_585_70 > threshold_aa 
+aa_pa58570points <- rasterToPoints(aa_pa58570, function(x)x==1)
 
 ggplot() +
   geom_density(
-    aes(aa_currentpapoints[,2],
+    aes(y = aa_currentpapoints[,2],
         fill = "Current",
         colour = "Current"),
     alpha = 0.1) +
   geom_density(
-    aes(aa_pa2650points[,2],
+    aes(y = aa_pa12650points[,2],
         fill = "2050",
         colour = "2050"),
     alpha = 0.1) +
   geom_density(
-    aes(aa_pa2670points[,2],
-        fill = "2070",
-        colour = "2070"),
-    alpha = 0.1) +
-  ggtitle("Change in Longitudinal Distribution of A. alnifolia under SSP126") +
-  xlab("Longitude")+
-  theme_light()
-    
-ggplot() +
-  geom_density(
-    aes(y = aa_currentpapoints[,1],
-        fill = "Current",
-        colour = "Current"),
-    alpha = 0.1) +
-  geom_density(
-    aes(y = aa_pa2650points[,1],
-        fill = "2050",
-        colour = "2050"),
-    alpha = 0.1) +
-  geom_density(
-    aes(y = aa_pa2670points[,1],
+    aes(y = aa_pa12670points[,2],
         fill = "2070",
         colour = "2070"),
     alpha = 0.1) +
   ggtitle("Change in Latitudinal Distribution of A. alnifolia under SSP126") +
   ylab("Latitude")+
-  theme_light()
-
-
+  theme_light() +
+  theme(plot.title = element_text(hjust = 0.5))
+    
 ggplot() +
   geom_density(
-    aes(aa_currentpapoints[,2],
+    aes(aa_currentpapoints[,1],
         fill = "Current",
         colour = "Current"),
     alpha = 0.1) +
   geom_density(
-    aes(aa_pa8550points[,2],
+    aes(aa_pa12650points[,1],
         fill = "2050",
         colour = "2050"),
     alpha = 0.1) +
   geom_density(
-    aes(aa_pa8570points[,2],
+    aes(aa_pa12670points[,1],
         fill = "2070",
         colour = "2070"),
     alpha = 0.1) +
-  ggtitle("Change in Longitudinal Distribution of A. alnifolia under SSP585") +
+  ggtitle("Change in Longitudinal Distribution of A. alnifolia under SSP126") +
   xlab("Longitude")+
-  theme_light()
+  theme_light()+
+  theme(plot.title = element_text(hjust = 0.5))
 
 ggplot() +
   geom_density(
-    aes(y = aa_currentpapoints[,1],
+    aes(y = aa_currentpapoints[,2],
         fill = "Current",
         colour = "Current"),
     alpha = 0.1) +
   geom_density(
-    aes(y = aa_pa8550points[,1],
+    aes(y = aa_pa58550points[,2],
         fill = "2050",
         colour = "2050"),
     alpha = 0.1) +
   geom_density(
-    aes(y = aa_pa8570points[,1],
+    aes(y = aa_pa58570points[,2],
         fill = "2070",
         colour = "2070"),
     alpha = 0.1) +
   ggtitle("Change in Latitudinal Distribution of A. alnifolia under SSP585") +
-  ylab("Latitude")+
-  theme_light()
+  ylab("Latitudinal")+
+  theme_light()+
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot() +
+  geom_density(
+    aes(aa_currentpapoints[,1],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(aa_pa58550points[,1],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(aa_pa58570points[,1],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Longitudinal Distribution of A. alnifolia under SSP585") +
+  xlab("Longitudinal")+
+  theme_light()+
+  theme(plot.title = element_text(hjust = 0.5))
 
 
 
@@ -1120,6 +1127,11 @@ box()
 rl_currentpa <- predict_presence_rl>threshold_rl 
 rl_currentpapoints <- rasterToPoints(rl_currentpa, function(x)x==1)
 
+cell_size <- area(rl_currentpa)@data@values
+cell_size <- cell_size[!is.na(cell_size)]
+raster_area <- length(cell_size)*median(cell_size)
+print(raster_area)
+
 rl_pa2650 <- forecast_presence_rl_126_50 > threshold_rl 
 rl_pa2650points <- rasterToPoints(rl_pa2650, function(x)x==1)
 
@@ -1134,37 +1146,17 @@ rl_pa8570points <- rasterToPoints(rl_pa8570, function(x)x==1)
 
 ggplot() +
   geom_density(
-    aes(rl_currentpapoints[,2],
+    aes(y = rl_currentpapoints[,2],
         fill = "Current",
         colour = "Current"),
     alpha = 0.1) +
   geom_density(
-    aes(rl_pa2650points[,2],
+    aes(y = rl_pa2650points[,2],
         fill = "2050",
         colour = "2050"),
     alpha = 0.1) +
   geom_density(
-    aes(rl_pa2670points[,2],
-        fill = "2070",
-        colour = "2070"),
-    alpha = 0.1) +
-  ggtitle("Change in Longitudinal Distribution of R. lasiococcus under SSP126") +
-  xlab("Longitude")+
-  theme_light()
-
-ggplot() +
-  geom_density(
-    aes(y = rl_currentpapoints[,1],
-        fill = "Current",
-        colour = "Current"),
-    alpha = 0.1) +
-  geom_density(
-    aes(y = rl_pa2650points[,1],
-        fill = "2050",
-        colour = "2050"),
-    alpha = 0.1) +
-  geom_density(
-    aes(y = rl_pa2670points[,1],
+    aes(y = rl_pa2670points[,2],
         fill = "2070",
         colour = "2070"),
     alpha = 0.1) +
@@ -1172,45 +1164,65 @@ ggplot() +
   ylab("Latitude")+
   theme_light()
 
-
 ggplot() +
   geom_density(
-    aes(rl_currentpapoints[,2],
+    aes(rl_currentpapoints[,1],
         fill = "Current",
         colour = "Current"),
     alpha = 0.1) +
   geom_density(
-    aes(rl_pa8550points[,2],
+    aes(rl_pa2650points[,1],
         fill = "2050",
         colour = "2050"),
     alpha = 0.1) +
   geom_density(
-    aes(rl_pa8570points[,2],
+    aes(rl_pa2670points[,1],
         fill = "2070",
         colour = "2070"),
     alpha = 0.1) +
-  ggtitle("Change in Longitudinal Distribution of R. lasiococcus under SSP585") +
+  ggtitle("Change in Longitudinal Distribution of R. lasiococcus under SSP126") +
   xlab("Longitude")+
   theme_light()
 
+
 ggplot() +
   geom_density(
-    aes(y = rl_currentpapoints[,1],
+    aes(y = rl_currentpapoints[,2],
         fill = "Current",
         colour = "Current"),
     alpha = 0.1) +
   geom_density(
-    aes(y = rl_pa8550points[,1],
+    aes(y = rl_pa8550points[,2],
         fill = "2050",
         colour = "2050"),
     alpha = 0.1) +
   geom_density(
-    aes(y = rl_pa8570points[,1],
+    aes(y = rl_pa8570points[,2],
         fill = "2070",
         colour = "2070"),
     alpha = 0.1) +
   ggtitle("Change in Latitudinal Distribution of R. lasiococcus under SSP585") +
   ylab("Latitude")+
+  theme_light()
+
+ggplot() +
+  geom_density(
+    aes(rl_currentpapoints[,1],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(rl_pa8550points[,1],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(rl_pa8570points[,1],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Longitudinal Distribution of R. lasiococcus under SSP585") +
+  xlab("Longitude")+
   theme_light()
 
 
@@ -1673,84 +1685,88 @@ rn_pa8570points <- rasterToPoints(rn_pa8570, function(x)x==1)
 
 ggplot() +
   geom_density(
-    aes(rn_currentpapoints[,2],
+    aes(y = rn_currentpapoints[,2],
         fill = "Current",
         colour = "Current"),
     alpha = 0.1) +
   geom_density(
-    aes(rn_pa2650points[,2],
+    aes(y = rn_pa2650points[,2],
         fill = "2050",
         colour = "2050"),
     alpha = 0.1) +
   geom_density(
-    aes(rn_pa2670points[,2],
-        fill = "2070",
-        colour = "2070"),
-    alpha = 0.1) +
-  ggtitle("Change in Longitudinal Distribution of R. nivalis under SSP126") +
-  xlab("Longitude")+
-  theme_light()
-
-ggplot() +
-  geom_density(
-    aes(y = rn_currentpapoints[,1],
-        fill = "Current",
-        colour = "Current"),
-    alpha = 0.1) +
-  geom_density(
-    aes(y = rn_pa2650points[,1],
-        fill = "2050",
-        colour = "2050"),
-    alpha = 0.1) +
-  geom_density(
-    aes(y = rn_pa2670points[,1],
+    aes(y = rn_pa2670points[,2],
         fill = "2070",
         colour = "2070"),
     alpha = 0.1) +
   ggtitle("Change in Latitudinal Distribution of R. nivalis under SSP126") +
   ylab("Latitude")+
-  theme_light()
-
+  theme_light()+
+  theme(plot.title = element_text(hjust = 0.5))
 
 ggplot() +
   geom_density(
-    aes(rn_currentpapoints[,2],
+    aes(rn_currentpapoints[,1],
         fill = "Current",
         colour = "Current"),
     alpha = 0.1) +
   geom_density(
-    aes(rn_pa8550points[,2],
+    aes(rn_pa2650points[,1],
         fill = "2050",
         colour = "2050"),
     alpha = 0.1) +
   geom_density(
-    aes(rn_pa8570points[,2],
+    aes(rn_pa2670points[,1],
         fill = "2070",
         colour = "2070"),
     alpha = 0.1) +
-  ggtitle("Change in Longitudinal Distribution of R. nivalis under SSP585") +
-  xlab("Longitude")+
-  theme_light()
+  ggtitle("Change in Longitudinal Distribution of R. nivalis under SSP126") +
+  ylab("Longitude")+
+  theme_light()+
+  theme(plot.title = element_text(hjust = 0.5))
+
 
 ggplot() +
   geom_density(
-    aes(y = rn_currentpapoints[,1],
+    aes(y = rn_currentpapoints[,2],
         fill = "Current",
         colour = "Current"),
     alpha = 0.1) +
   geom_density(
-    aes(y = rn_pa8550points[,1],
+    aes(y = rn_pa8550points[,2],
         fill = "2050",
         colour = "2050"),
     alpha = 0.1) +
   geom_density(
-    aes(y = rn_pa8570points[,1],
+    aes(y = rn_pa8570points[,2],
         fill = "2070",
         colour = "2070"),
     alpha = 0.1) +
   ggtitle("Change in Latitudinal Distribution of R. nivalis under SSP585") +
-  ylab("Latitude")+
-  theme_light()
+  xlab("Latitude")+
+  theme_light()+
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot() +
+  geom_density(
+    aes(rn_currentpapoints[,1],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(rn_pa8550points[,1],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(rn_pa8570points[,1],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Longitudinal Distribution of R. nivalis under SSP585") +
+  ylab("Longitude")+
+  theme_light()+
+  theme(plot.title = element_text(hjust = 0.5))
 
 
 
@@ -1799,7 +1815,7 @@ plot(wrld_simpl,
      axes = TRUE, 
      col = "grey95")
 
-plot(predict_presence_rn, add = TRUE)
+plot(predict_presence_vp, add = TRUE)
 
 plot(wrld_simpl, add = TRUE, border = "grey5")
 
@@ -2095,7 +2111,7 @@ plot(wrld_simpl,
      main = "Current Predicted Landscape Suitability")
 
 # Only plot areas where probability of occurrence is greater than the threshold
-plot(predict_presence_vp > bc_threshold_vp, 
+plot(predict_presence_vp > threshold_vp, 
      add = TRUE, 
      legend = FALSE, 
      col = c(NA, "#7570B3"))
@@ -2220,84 +2236,88 @@ vp_pa8570points <- rasterToPoints(vp_pa8570, function(x)x==1)
 
 ggplot() +
   geom_density(
-    aes(vp_currentpapoints[,2],
+    aes(y = vp_currentpapoints[,2],
         fill = "Current",
         colour = "Current"),
     alpha = 0.1) +
   geom_density(
-    aes(vp_pa2650points[,2],
+    aes(y = vp_pa2650points[,2],
         fill = "2050",
         colour = "2050"),
     alpha = 0.1) +
   geom_density(
-    aes(vp_pa2670points[,2],
-        fill = "2070",
-        colour = "2070"),
-    alpha = 0.1) +
-  ggtitle("Change in Longitudinal Distribution of V. parvifolium under SSP126") +
-  xlab("Longitude")+
-  theme_light()
-
-ggplot() +
-  geom_density(
-    aes(y = vp_currentpapoints[,1],
-        fill = "Current",
-        colour = "Current"),
-    alpha = 0.1) +
-  geom_density(
-    aes(y = vp_pa2650points[,1],
-        fill = "2050",
-        colour = "2050"),
-    alpha = 0.1) +
-  geom_density(
-    aes(y = vp_pa2670points[,1],
+    aes(y = vp_pa2670points[,2],
         fill = "2070",
         colour = "2070"),
     alpha = 0.1) +
   ggtitle("Change in Latitudinal Distribution of V. parvifolium under SSP126") +
   ylab("Latitude")+
-  theme_light()
-
+  theme_light()+
+  theme(plot.title = element_text(hjust = 0.5))
 
 ggplot() +
   geom_density(
-    aes(vp_currentpapoints[,2],
+    aes(vp_currentpapoints[,1],
         fill = "Current",
         colour = "Current"),
     alpha = 0.1) +
   geom_density(
-    aes(vp_pa8550points[,2],
+    aes(vp_pa2650points[,1],
         fill = "2050",
         colour = "2050"),
     alpha = 0.1) +
   geom_density(
-    aes(vp_pa8570points[,2],
+    aes(vp_pa2670points[,1],
         fill = "2070",
         colour = "2070"),
     alpha = 0.1) +
-  ggtitle("Change in Longitudinal Distribution of V. parvifolium under SSP585") +
+  ggtitle("Change in Longitudinal Distribution of V. parvifolium under SSP126") +
   xlab("Longitude")+
-  theme_light()
+  theme_light()+
+  theme(plot.title = element_text(hjust = 0.5))
+
 
 ggplot() +
   geom_density(
-    aes(y = vp_currentpapoints[,1],
+    aes(y = vp_currentpapoints[,2],
         fill = "Current",
         colour = "Current"),
     alpha = 0.1) +
   geom_density(
-    aes(y = vp_pa8550points[,1],
+    aes(y = vp_pa8550points[,2],
         fill = "2050",
         colour = "2050"),
     alpha = 0.1) +
   geom_density(
-    aes(y = vp_pa8570points[,1],
+    aes(y = vp_pa8570points[,2],
         fill = "2070",
         colour = "2070"),
     alpha = 0.1) +
   ggtitle("Change in Latitudinal Distribution of V. parvifolium under SSP585") +
   ylab("Latitude")+
-  theme_light()
+  theme_light()+
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot() +
+  geom_density(
+    aes(vp_currentpapoints[,1],
+        fill = "Current",
+        colour = "Current"),
+    alpha = 0.1) +
+  geom_density(
+    aes(vp_pa8550points[,1],
+        fill = "2050",
+        colour = "2050"),
+    alpha = 0.1) +
+  geom_density(
+    aes(vp_pa8570points[,1],
+        fill = "2070",
+        colour = "2070"),
+    alpha = 0.1) +
+  ggtitle("Change in Longitudinal Distribution of V. parvifolium under SSP585") +
+  xlab("Longitude")+
+  theme_light()+
+  theme(plot.title = element_text(hjust = 0.5))
 
 
 
