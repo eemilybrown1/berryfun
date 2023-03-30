@@ -24,7 +24,10 @@ library(tidyterra)
 library(dismo)
 library(ggpubr)
 library(qpdf)
+<<<<<<< HEAD
 library(ggspatial)
+=======
+>>>>>>> 7cb1b6b3a31768647daccf7afb92f2dab60d3169
 #setwd to data to load occurrence data
 setwd(here('data'))
 
@@ -57,6 +60,7 @@ vp.occ <- read.csv(file = 'vacciniumparvifolium.csv') %>% filter(stateProvince %
 wc <- worldclim_global(var = 'bio', res = 2.5, version = '2.1', path = here('data')) #download wc - data 1970-2000 'baseline'
 
 #CMIP6 - SSP 245
+<<<<<<< HEAD
 cmip6.245.2040 <- cmip6_world(model='MRI-ESM2-0', ssp='245',time='2021-2040', var='bioc', res = 2.5, path = here('data')) 
 cmip6.245.2060 <- cmip6_world(model='MRI-ESM2-0', ssp='245',time='2041-2060', var='bioc', res = 2.5, path = here('data')) 
 cmip6.245.2080 <- cmip6_world(model='MRI-ESM2-0', ssp='245',time='2061-2080', var='bioc', res = 2.5, path = here('data')) 
@@ -67,6 +71,16 @@ cmip6.245.2100 <- cmip6_world(model='MRI-ESM2-0', ssp='245',time='2081-2100', va
 cmip6.585.2040 <- cmip6_world(model='MRI-ESM2-0', ssp='585',time='2021-2040', var='bioc', res = 2.5, path = here('data'))  
 cmip6.585.2060 <- cmip6_world(model='MRI-ESM2-0', ssp='585',time='2041-2060', var='bioc', res = 2.5, path = here('data')) 
 cmip6.585.2080 <- cmip6_world(model='MRI-ESM2-0', ssp='585',time='2061-2080', var='bioc', res = 2.5, path = here('data')) 
+=======
+cmip6.245.2040 <- cmip6_world(model='GISS-E2-1-H', ssp='245',time='2021-2040', var='bioc', res = 2.5, path = here('data')) #CMG is NASA's GISS-E2-1-H - cited as performing best
+cmip6.245.2060 <- cmip6_world(model='GISS-E2-1-H', ssp='245',time='2041-2060', var='bioc', res = 2.5, path = here('data')) #CMG is NASA's GISS-E2-1-H - cited as performing best
+cmip6.245.2080 <- cmip6_world(model='GISS-E2-1-H', ssp='245',time='2061-2080', var='bioc', res = 2.5, path = here('data')) #CMG is NASA's GISS-E2-1-H - cited as performing best
+
+#CMIP6 - SSP 585
+cmip6.585.2040 <- cmip6_world(model='GISS-E2-1-H', ssp='585',time='2021-2040', var='bioc', res = 2.5, path = here('data')) #CMG is NASA's GISS-E2-1-H - cited as performing best
+cmip6.585.2060 <- cmip6_world(model='GISS-E2-1-H', ssp='585',time='2041-2060', var='bioc', res = 2.5, path = here('data')) #CMG is NASA's GISS-E2-1-H - cited as performing best
+cmip6.585.2080 <- cmip6_world(model='GISS-E2-1-H', ssp='585',time='2061-2080', var='bioc', res = 2.5, path = here('data')) #CMG is NASA's GISS-E2-1-H - cited as performing best
+>>>>>>> 7cb1b6b3a31768647daccf7afb92f2dab60d3169
 
 
 pnw <- raster(paste0(here('data/pnw_raster_10000.tif'))) #import raster tiff for geo ref
@@ -111,9 +125,13 @@ wc.pnw.crop <- crop(wc.pnw, extent(c(-123.6, -123.4), #you will need to zoom in 
 
 bound <- c('Oregon', 'Washington', 'British Columbia')
 pnw.bound <- gadm(country=c('USA', 'CAN'), level =1, path = here('data')) 
+<<<<<<< HEAD
 pnw.bound <- pnw.bound[pnw.bound$NAME_1 %in% bound,]
 
 crs(pnw.bound)
+=======
+pnw.bound <-pnw.bound[pnw.bound$NAME_1 %in% bound,]
+>>>>>>> 7cb1b6b3a31768647daccf7afb92f2dab60d3169
 
 #GGPLOT 
 #first need to convert raster to df for ggplot
@@ -144,6 +162,7 @@ theme_maps <- theme(
   plot.title = element_text(size = 4)
 )
 #PLOTTING
+<<<<<<< HEAD
 #basemap
 
 basemap <- ggplot() + geom_spatvector(data=pnw.bound, fill = 'grey', colour = 'black') +
@@ -152,6 +171,8 @@ basemap <- ggplot() + geom_spatvector(data=pnw.bound, fill = 'grey', colour = 'b
   annotation_north_arrow() 
 
 ggsave(filename='pnw_basemap.pdf', plot = basemap, path = here('figures'))
+=======
+>>>>>>> 7cb1b6b3a31768647daccf7afb92f2dab60d3169
 #plotting 1970-2000 climatic variables
 #####
 bio.1 <- ggplot() + geom_raster(data = wc.pnw.df.all, aes(x=x, y=y, fill= wc2.1_2.5m_bio_1)) +
@@ -1140,7 +1161,11 @@ pdf_combine(input = c(here('figures/world clim/ssp245_2080/1temp_plots_245_2080.
             output = here('figures/world clim/ssp245_2080/wc_245_2080.pdf'))
 #####
 #CMIP6 SSP585 - 2021-2040
+<<<<<<< HEAD
 #SSP_585_2040
+=======
+#SSP_245_2040
+>>>>>>> 7cb1b6b3a31768647daccf7afb92f2dab60d3169
 #####
 ssp585.2040.bio.1 <- ggplot() + geom_raster(data = cmip6.585.2040.pnw.df, aes(x=x, y=y, fill= wc2_1)) +
   scale_fill_viridis(option='A') +
@@ -1880,8 +1905,12 @@ pdf_combine(input = c(here('figures/world clim/ssp585_2080/1temp_plots_585_2080.
                       here('figures/world clim/ssp585_2080/1perc_plots_585_2080.pdf'), here('figures/world clim/ssp585_2080/2perc_plots_585_2080.pdf')),
             output = here('figures/world clim/ssp585_2080/wc_585_2080.pdf'))
 #####
+<<<<<<< HEAD
 #Ploting bio vars together with baseline and future projections
 #####
+=======
+#group bio clim vars
+>>>>>>> 7cb1b6b3a31768647daccf7afb92f2dab60d3169
 blank.plot <- ggplot() + geom_blank() +theme_transparent() #make blank plot for ggarange
 #BIO1 - Mean Annual Temp
 bio.1.plots <- ggarrange(bio.1, blank.plot, ssp245.2040.bio.1,ssp585.2040.bio.1, ssp245.2060.bio.1, ssp585.2060.bio.1, ssp245.2080.bio.1, ssp585.2080.bio.1, 
