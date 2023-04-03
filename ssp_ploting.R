@@ -20,7 +20,7 @@ pnw.bound.exnt <- ext(pnw.bound)
 #SSP data from https://data.ceda.ac.uk/badc/cmip6/data/CMIP6/ScenarioMIP/MRI/MRI-ESM2-0
 #historical data from https://data.ceda.ac.uk/badc/cmip6/data/CMIP6/CMIP/MRI/MRI-ESM2-0/historical
 #Surface temperature----
-historical_nc <- nc_open("C:\\Users\\terre\\Documents\\R\\berryfun\\data\\MRI-EMS2-0\\tas_Amon_MRI-ESM2-0_historical_r1i1p1f1_gn_185001-201412.nc")
+historical_nc <- nc_open("C:\\Users\\terre\\Documents\\UBC\\UBC Course work\\ZOOL509\\project\\tas_Amon_MRI-ESM2-0_historical_r1i1p1f1_gn_185001-201412.nc")
 
 
 historical_lon <- ncvar_get(historical_nc, 'lon')
@@ -50,7 +50,7 @@ historical_series_mean <- data.frame(mean_k = apply(historical_series_pnw, 2, me
             scenario=c(paste('Historic')))
 
 
-ssp245_nc <- nc_open("C:\\Users\\terre\\Documents\\R\\berryfun\\data\\MRI-EMS2-0\\tas_Amon_MRI-ESM2-0_ssp245_r1i1p1f1_gn_201501-210012.nc")
+ssp245_nc <- nc_open('C:\\Users\\terre\\Documents\\UBC\\UBC Course work\\ZOOL509\\project\\tas_Amon_MRI-ESM2-0_ssp245_r1i1p1f1_gn_201501-210012.nc')
 
 
 ssp245_lon <- ncvar_get(ssp245_nc, 'lon')
@@ -79,7 +79,7 @@ ssp245_series_mean <- data.frame(mean_k = apply(ssp245_series_pnw, 2, mean),
             tas_sd_c=sd(mean_c),
             scenario=c(paste('SSP245')))
 
-ssp585_nc <- nc_open("C:\\Users\\terre\\Documents\\R\\berryfun\\data\\MRI-EMS2-0\\tas_Amon_MRI-ESM2-0_ssp585_r1i1p1f1_gn_201501-210012.nc")
+ssp585_nc <- nc_open('C:\\Users\\terre\\Documents\\UBC\\UBC Course work\\ZOOL509\\project\\tas_Amon_MRI-ESM2-0_ssp585_r1i1p1f1_gn_201501-210012.nc')
 
 ssp585_lon <- ncvar_get(ssp585_nc, 'lon')
 ssp585_lat <- ncvar_get(ssp585_nc, "lat", verbose = F)
@@ -135,7 +135,7 @@ ggplot() +
 
 #precipitation----
 #https://data.ceda.ac.uk/badc/cmip6/data/CMIP6/ScenarioMIP/MRI/MRI-ESM2-0/ssp585/r1i1p1f1/Amon/pr/gn
-historical_pr_nc <- nc_open("C:\\Users\\terre\\Documents\\R\\berryfun\\data\\MRI-EMS2-0\\pr_Amon_MRI-ESM2-0_historical_r1i1p1f1_gn_185001-201412.nc")
+historical_pr_nc <- nc_open("C:\\Users\\terre\\Documents\\UBC\\UBC Course work\\ZOOL509\\project\\pr_Amon_MRI-ESM2-0_historical_r1i1p1f1_gn_185001-201412.nc")
 
 historical_pr_lon <- ncvar_get(historical_pr_nc, 'lon')
 historical_pr_lat <- ncvar_get(historical_pr_nc, "lat", verbose = F)
@@ -165,7 +165,7 @@ historical_pr_series_mean <- data.frame(mean_kgms = apply(historical_pr_series_p
             scenario=c(paste('Historic')))
 
 #SSP245 perc
-ssp245_pr_nc <- nc_open("C:\\Users\\terre\\Documents\\R\\berryfun\\data\\MRI-EMS2-0\\pr_Amon_MRI-ESM2-0_ssp245_r1i1p1f1_gn_201501-210012.nc")
+ssp245_pr_nc <- nc_open("C:\\Users\\terre\\Documents\\UBC\\UBC Course work\\ZOOL509\\project\\pr_Amon_MRI-ESM2-0_ssp245_r1i1p1f1_gn_201501-210012.nc")
 
 ssp245_pr_lon <- ncvar_get(ssp245_pr_nc, 'lon')
 ssp245_pr_lat <- ncvar_get(ssp245_pr_nc, "lat", verbose = F)
@@ -194,7 +194,7 @@ ssp245_pr_series_mean <- data.frame(mean_kgms = apply(ssp245_pr_series_pnw, 2, m
             pr_sd_mm=sd(mean_mm),
             scenario=c(paste('SSP245')))
 
-ssp585_pr_nc <- nc_open("C:\\Users\\terre\\Documents\\R\\berryfun\\data\\MRI-EMS2-0\\pr_Amon_MRI-ESM2-0_ssp585_r1i1p1f1_gn_201501-210012.nc")
+ssp585_pr_nc <- nc_open("C:\\Users\\terre\\Documents\\UBC\\UBC Course work\\ZOOL509\\project\\pr_Amon_MRI-ESM2-0_ssp585_r1i1p1f1_gn_201501-210012.nc")
 
 ssp585_pr_lon <- ncvar_get(ssp585_pr_nc, 'lon')
 ssp585_pr_lat <- ncvar_get(ssp585_pr_nc, "lat", verbose = F)
