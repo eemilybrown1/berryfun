@@ -430,7 +430,7 @@ aa_ssp245_legend <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
         axis.text = element_text(colour = 'black', size = 12),
         title = element_text(colour = 'black', size = 16)) +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
-  ggtitle(expression(atop(paste(italic('Amelanchier alnifolia'),' ','Forecasted'), paste('SSP245 Habitat Suitability'))))+
+  #ggtitle(expression(atop(paste(italic('Amelanchier alnifolia'),' ','Forecasted'), paste('SSP245 Habitat Suitability'))))+
   easy_center_title()
 
 aa_ssp245_legend
@@ -517,7 +517,7 @@ aa_ssp585_legend <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
         axis.text = element_text(colour = 'black', size = 12),
         title = element_text(colour = 'black', size = 16)) +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
-  ggtitle(expression(atop(paste(italic('Amelanchier alnifolia'),' ','Forecasted'), paste('SSP585 Habitat Suitability'))))+
+  #ggtitle(expression(atop(paste(italic('Amelanchier alnifolia'),' ','Forecasted'), paste('SSP585 Habitat Suitability'))))+
   easy_center_title()
 
 aa_ssp585_legend
@@ -797,6 +797,25 @@ rl_pa_58570_crop<- crop(x=rl_pa_58570_vect, y=pnw.bound)
 rl_pa_58570_mask <- mask(x=rl_pa_58570_crop, mask=pnw.bound)
 rl_pa_58570_sub <- terra::subset(rl_pa_58570_mask, rl_pa_58570_mask$layer==1)
 
+rl_observations <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey', colour = 'black') +
+  geom_point(data=latlon_rl_obs, aes(x=decimalLongitude, y=decimalLatitude, colour = record_fac) , size = 0.8) +
+  theme_bw() +
+  theme(axis.text = element_text(size = 12, colour = 'black')) +
+  annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
+  annotation_scale(width_hint=.3) +
+  theme(legend.background = element_rect(colour = 'black'),
+        legend.position = c(.2, .35),
+        legend.text = element_text(colour = 'black', size = 12),
+        legend.title = element_text(colour = 'black', size =12),
+        axis.text = element_text(colour = 'black', size = 12)) +
+  scale_x_continuous(breaks = c(-135, -125, -115)) +
+  #ggtitle(expression(atop(paste(italic('Amelanchier alnifolia')), paste('GBIF Research Grade Observations'))))+
+  labs(x=NULL, y=NULL) +
+  easy_center_title() +
+  scale_colour_manual(breaks = c("HUMAN_OBSERVATION", 'PRESERVED_SPECIMEN', 'OCCURRENCE'), values = c('PRESERVED_SPECIMEN' = '#E69F00', 'HUMAN_OBSERVATION' = '#0072B2', 'OCCURRENCE' = '#F0E442'), labels = c('Human\nObservation', 'Preserved\nSpecimen', 'Unspecified\nOccurence'), name = 'Basis of Record') +
+  guides(colour = guide_legend(override.aes = list(size=5), keyheight = 1.5))
+
+rl_observations
 #Historical habitat suitability 
 rl_historical <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
   geom_sf(data=rl_currentpa_sub, aes(fill = 'Historical'), colour = 'transparent') +
@@ -805,77 +824,77 @@ rl_historical <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = "Historical", values = c('Historical' = '#FF0000'), labels = 'Historical', name = 'Habitat Suitability') +
+  scale_fill_manual(breaks = "Historical", values = c('Historical' = '#0072B2'), labels = 'Historical', name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
         legend.title = element_text(colour = 'black', size =12),
         axis.text = element_text(colour = 'black', size = 12)) +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
-  ggtitle('Historical Habitat\nSuitability (1970-2000)') +
+  #ggtitle('Historical Habitat\nSuitability (1970-2000)') +
   easy_center_title()
 
 rl_historical
 
 #ssp245 2030 suitability 
 rl_ssp245_2030 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=rl_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
-  geom_sf(data=rl_pa_24530_sub, fill = '#FFD5FF', colour = 'transparent') +
+  #geom_sf(data=rl_currentpa_sub, aes(fill = 'Historical'), colour = 'transparent') +
+  geom_sf(data=rl_pa_24530_sub, aes(fill = '2030'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030'), values = c('2030' = '#98E4B8', 'Historical' = '#FF0000'), labels = c('Historical', '2030'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030'), values = c('2030'= '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', 'SSP245 2030'),  name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
         legend.title = element_text(colour = 'black', size =12),
         axis.text = element_text(colour = 'black', size = 12)) +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
-  ggtitle(expression(atop(paste(italic('Rubus lasiococcus'),' ','Forecasted'), paste('2030 SSP245 Habitat Suitability'))))+
+  #ggtitle(expression(atop(paste(italic('Rubus lasiococcus'),' ','Forecasted'), paste('2030 SSP245 Habitat Suitability'))))+
   easy_center_title()
 
 rl_ssp245_2030
 
 #ssp245 2050 suitability 
 rl_ssp245_2050 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=rl_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
-  geom_sf(data=rl_pa_24550_sub, fill = '#ED83D1', colour = 'transparent') +
+  #geom_sf(data=rl_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
+  geom_sf(data=rl_pa_24550_sub, aes(fill = '2050'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical",'2050'), values = c( '2050' = '#189E77', 'Historical' = '#FF0000'), labels = c('Historical', '2050'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2050'), values = c('2050'= '#E69F00', 'Historical' = '#0072B2'), labels = c('Historical', 'SSP245 2050'),  name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
         legend.title = element_text(colour = 'black', size =12),
         axis.text = element_text(colour = 'black', size = 12)) +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
-  ggtitle(expression(atop(paste(italic('Rubus lasiococcus'),' ','Forecasted'), paste('2050 SSP245 Habitat Suitability'))))+
+  #ggtitle(expression(atop(paste(italic('Rubus lasiococcus'),' ','Forecasted'), paste('2050 SSP245 Habitat Suitability'))))+
   easy_center_title()
 
 rl_ssp245_2050
 
 #ssp245 2070 suitability 
 rl_ssp245_2070 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=rl_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
-  geom_sf(data=rl_pa_24570_sub, fill = '#E7298A', colour = 'transparent') +
+  #geom_sf(data=rl_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
+  geom_sf(data=rl_pa_24570_sub, aes(fill = '2070'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2070'), values = c('2070' = '#0E543F','Historical' = '#FF0000'), labels = c('Historical',  '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2070'), values = c('2070' = '#D55E00', 'Historical' = '#0072B2'), labels = c('Historical', 'SSP245 2070'),  name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
         legend.title = element_text(colour = 'black', size =12),
         axis.text = element_text(colour = 'black', size = 12)) +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
-  ggtitle(expression(atop(paste(italic('Rubus lasiococcus'),' ','Forecasted'), paste('2070 SSP245 Habitat Suitability'))))+
+  #ggtitle(expression(atop(paste(italic('Rubus lasiococcus'),' ','Forecasted'), paste('2070 SSP245 Habitat Suitability'))))+
   easy_center_title()
 
 rl_ssp245_2070
@@ -891,7 +910,7 @@ rl_ssp245_legend <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#0E543F',  '2050' = '#189E77','2030' = '#98E4B8', 'Historical' = '#FF0000'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
         legend.text = element_text(colour = 'black', size = 12),
@@ -899,63 +918,63 @@ rl_ssp245_legend <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
         axis.text = element_text(colour = 'black', size = 12),
         title = element_text(colour = 'black', size = 16)) +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
-  ggtitle(expression(atop(paste(italic('Rubus lasiococcus'),' ','Forecasted'), paste('SSP245 Habitat Suitability'))))+
+  #ggtitle(expression(atop(paste(italic('Rubus lasiococcus'),' ','Forecasted'), paste('SSP245 Habitat Suitability'))))+
   easy_center_title()
 
 rl_ssp245_legend
 
 #ssp585 2030 suitability 
 rl_ssp585_2030 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=rl_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
-  geom_sf(data=rl_pa_58530_sub, fill = '#FFD5FF', colour = 'transparent') +
+  #geom_sf(data=rl_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
+  geom_sf(data=rl_pa_58530_sub, aes(fill = '2030'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030'), values = c('2030' = '#98E4B8', 'Historical' = '#FF0000'), labels = c('Historical', '2030'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030'), values = c('2030'= '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', 'SSP585 2030'),  name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
         legend.title = element_text(colour = 'black', size =12),
         axis.text = element_text(colour = 'black', size = 12)) +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
-  ggtitle(expression(atop(paste(italic('Rubus lasiococcus'),' ','Forecasted'), paste('2030 SSP585 Habitat Suitability'))))+
+  #ggtitle(expression(atop(paste(italic('Rubus lasiococcus'),' ','Forecasted'), paste('2030 SSP585 Habitat Suitability'))))+
   easy_center_title()
 
 rl_ssp585_2030
 
 #ssp245 2050 suitability 
 rl_ssp585_2050 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=rl_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
-  geom_sf(data=rl_pa_58550_sub, fill = '#ED83D1', colour = 'transparent') +
+  #geom_sf(data=rl_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
+  geom_sf(data=rl_pa_58550_sub, aes(fill = '2050'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical",  '2050'), values = c('2050' = '#189E77', 'Historical' = '#FF0000'), labels = c('Historical', '2050' ), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2050'), values = c('2050'= '#E69F00', 'Historical' = '#0072B2'), labels = c('Historical', 'SSP585 2050'),  name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
         legend.title = element_text(colour = 'black', size =12),
         axis.text = element_text(colour = 'black', size = 12)) +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
-  ggtitle(expression(atop(paste(italic('Rubus lasiococcus'),' ','Forecasted'), paste('2050 SSP585 Habitat Suitability'))))+
+  #ggtitle(expression(atop(paste(italic('Rubus lasiococcus'),' ','Forecasted'), paste('2050 SSP585 Habitat Suitability'))))+
   easy_center_title()
 
 rl_ssp585_2050
 
 #ssp585 2070 suitability 
 rl_ssp585_2070 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=rl_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
-  geom_sf(data=rl_pa_58570_sub, fill = '#E7298A', colour = 'transparent') +
+  #geom_sf(data=rl_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
+  geom_sf(data=rl_pa_58570_sub, aes(fill = '2070'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  #scale_fill_manual(breaks = c("Historical", 'SSP585'), values = c('SSP585'= '#E7298A', 'Historical' = '#3333FF'), labels = c('Historical', 'SSP245'), name = 'Habitat Suitability') +
+  scale_fill_manual(breaks = c("Historical", '2070'), values = c('2070' = '#D55E00', 'Historical' = '#0072B2'), labels = c('Historical', 'SSP585 2070'),  name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
@@ -978,7 +997,7 @@ rl_ssp585_legend <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#0E543F',  '2050' = '#189E77','2030' = '#98E4B8', 'Historical' = '#FF0000'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
         legend.text = element_text(colour = 'black', size = 12),
@@ -986,7 +1005,7 @@ rl_ssp585_legend <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
         axis.text = element_text(colour = 'black', size = 12),
         title = element_text(colour = 'black', size = 16)) +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
-  ggtitle(expression(atop(paste(italic('Rubus lasiococcus'),' ','Forecasted'), paste('SSP585 Habitat Suitability'))))+
+  #ggtitle(expression(atop(paste(italic('Rubus lasiococcus'),' ','Forecasted'), paste('SSP585 Habitat Suitability'))))+
   easy_center_title()
 
 rl_ssp585_legend
@@ -1024,6 +1043,13 @@ rl_area_58550 <- terra::expanse(x=rl_pa_58550_sub, unit = 'km') %>%
 rl_area_58570 <- terra::expanse(x=rl_pa_58570_sub, unit = 'km') %>% 
   sum()
 
+rl_change_24530 <- ((rl_area_24530-rl_area_historical)/rl_area_historical)*100
+rl_change_24550 <- ((rl_area_24550-rl_area_historical)/rl_area_historical)*100 
+rl_change_24570 <- ((rl_area_24570-rl_area_historical)/rl_area_historical)*100
+rl_change_58530 <- ((rl_area_58530-rl_area_historical)/rl_area_historical)*100
+rl_change_58550 <- ((rl_area_58550-rl_area_historical)/rl_area_historical)*100
+rl_change_58570 <- ((rl_area_58570-rl_area_historical)/rl_area_historical)*100
+
 
 ##density plots for lat/lon distribution
 
@@ -1059,7 +1085,7 @@ ggplot() +
   ylab("Latitude") +
   xlab('Density') +
   theme_bw() +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#0E543F',  '2050' = '#189E77','2030' = '#98E4B8', 'Historical' = '#FF0000'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', 'SSP245 2070'), name = '') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
         legend.text = element_text(colour = 'black', size = 12),
@@ -1080,7 +1106,7 @@ ggplot() +
   xlab("Longitude") +
   ylab('Density') +
   theme_bw() +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#0E543F',  '2050' = '#189E77','2030' = '#98E4B8', 'Historical' = '#FF0000'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', 'SSP585 2070'), name = '') +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
@@ -1101,7 +1127,7 @@ ggplot() +
   ylab("Latitude") +
   xlab('Density') +
   theme_bw() +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#0E543F',  '2050' = '#189E77','2030' = '#98E4B8', 'Historical' = '#FF0000'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', 'SSP585 2070'), name = '') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
         legend.text = element_text(colour = 'black', size = 12),
@@ -1264,6 +1290,26 @@ rn_pa_58570_crop<- crop(x=rn_pa_58570_vect, y=pnw.bound)
 rn_pa_58570_mask <- mask(x=rn_pa_58570_crop, mask=pnw.bound)
 rn_pa_58570_sub <- terra::subset(rn_pa_58570_mask, rn_pa_58570_mask$layer==1)
 
+rn_observations <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey', colour = 'black') +
+  geom_point(data=latlon_rn_obs, aes(x=decimalLongitude, y=decimalLatitude, colour = record_fac) , size = 0.8) +
+  theme_bw() +
+  theme(axis.text = element_text(size = 12, colour = 'black')) +
+  annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
+  annotation_scale(width_hint=.3) +
+  theme(legend.background = element_rect(colour = 'black'),
+        legend.position = c(.2, .35),
+        legend.text = element_text(colour = 'black', size = 12),
+        legend.title = element_text(colour = 'black', size =12),
+        axis.text = element_text(colour = 'black', size = 12)) +
+  scale_x_continuous(breaks = c(-135, -125, -115)) +
+  #ggtitle(expression(atop(paste(italic('Amelanchier alnifolia')), paste('GBIF Research Grade Observations'))))+
+  labs(x=NULL, y=NULL) +
+  easy_center_title() +
+  scale_colour_manual(breaks = c("HUMAN_OBSERVATION", 'PRESERVED_SPECIMEN', 'OCCURRENCE'), values = c('PRESERVED_SPECIMEN' = '#E69F00', 'HUMAN_OBSERVATION' = '#0072B2', 'OCCURRENCE' = '#F0E442'), labels = c('Human\nObservation', 'Preserved\nSpecimen', 'Unspecified\nOccurence'), name = 'Basis of Record') +
+  guides(colour = guide_legend(override.aes = list(size=5), keyheight = 1.5))
+
+rn_observations
+
 #NOTE NEED TO CHANGE FILL COLOURS OF MOST PLOTS BELLOW 
 #Historical habitat suitability 
 rn_historical <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
@@ -1273,28 +1319,28 @@ rn_historical <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = "Historical", values = c('Historical' = '#3333FF'), labels = 'Historical', name = 'Habitat Suitability') +
+  scale_fill_manual(breaks = "Historical", values = c('Historical' = '#0072B2'), labels = 'Historical', name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
         legend.title = element_text(colour = 'black', size =12),
         axis.text = element_text(colour = 'black', size = 12)) +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
-  ggtitle('Historical Habitat\nSuitability (1970-2000)') +
+  #ggtitle('Historical Habitat\nSuitability (1970-2000)') +
   easy_center_title()
 
 rn_historical
 
 #ssp245 2030 suitability 
 rn_ssp245_2030 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=rn_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
-  geom_sf(data=rn_pa_24530_sub, fill = '#FFD5FF', colour = 'transparent') +
+  #geom_sf(data=rn_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
+  geom_sf(data=rn_pa_24530_sub, aes(fill = '2030'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#B34D00',  '2050' = '#DB6F1D','2030' = '#F0A461', 'Historical' = '#FFFF00'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', 'SSP245 2030', '2050', '2070'), name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
@@ -1308,14 +1354,14 @@ rn_ssp245_2030
 
 #ssp245 2050 suitability 
 rn_ssp245_2050 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=rn_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
-  geom_sf(data=rn_pa_24550_sub, fill = '#ED83D1', colour = 'transparent') +
+  #geom_sf(data=rn_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
+  geom_sf(data=rn_pa_24550_sub, aes(fill = '2050'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#B34D00',  '2050' = '#DB6F1D','2030' = '#F0A461', 'Historical' = '#FFFF00'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', 'SSP245 2050', '2070'), name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
@@ -1329,14 +1375,14 @@ rn_ssp245_2050
 
 #ssp245 2070 suitability 
 rn_ssp245_2070 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=rn_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
-  geom_sf(data=rn_pa_24570_sub, fill = '#E7298A', colour = 'transparent') +
+  #geom_sf(data=rn_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
+  geom_sf(data=rn_pa_24570_sub, aes(fill = '2070'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#B34D00',  '2050' = '#DB6F1D','2030' = '#F0A461', 'Historical' = '#FFFF00'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', 'SSP245 2070'), name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
@@ -1359,7 +1405,7 @@ rn_ssp245_legend <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#B34D00',  '2050' = '#DB6F1D','2030' = '#F0A461', 'Historical' = '#FFFF00'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
         legend.text = element_text(colour = 'black', size = 12),
@@ -1367,21 +1413,21 @@ rn_ssp245_legend <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
         axis.text = element_text(colour = 'black', size = 12),
         title = element_text(colour = 'black', size = 16)) +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
-  ggtitle(expression(atop(paste(italic('Rubus nivalis'),' ','Forecasted'), paste('SSP245 Habitat Suitability'))))+
+  #ggtitle(expression(atop(paste(italic('Rubus nivalis'),' ','Forecasted'), paste('SSP245 Habitat Suitability'))))+
   easy_center_title()
 
 rn_ssp245_legend
 
 #ssp585 2030 suitability 
 rn_ssp585_2030 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=rn_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
-  geom_sf(data=rn_pa_58530_sub, fill = '#FFD5FF', colour = 'transparent') +
+  #geom_sf(data=rn_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
+  geom_sf(data=rn_pa_58530_sub, aes(fill = '2030'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#B34D00',  '2050' = '#DB6F1D','2030' = '#F0A461', 'Historical' = '#FFFF00'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', 'SSP585 2030', '2050', '2070'), name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
@@ -1395,14 +1441,14 @@ rn_ssp585_2030
 
 #ssp245 2050 suitability 
 rn_ssp585_2050 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=rn_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
-  geom_sf(data=rn_pa_58550_sub, fill = '#ED83D1', colour = 'transparent') +
+  #geom_sf(data=rn_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
+  geom_sf(data=rn_pa_58550_sub, aes(fill = '2050'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#B34D00',  '2050' = '#DB6F1D','2030' = '#F0A461', 'Historical' = '#FFFF00'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', 'SSP585 2050', '2070'), name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
@@ -1416,14 +1462,14 @@ rn_ssp585_2050
 
 #ssp585 2070 suitability 
 rn_ssp585_2070 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=rn_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
-  geom_sf(data=rn_pa_58570_sub, fill = '#E7298A', colour = 'transparent') +
+  #geom_sf(data=rn_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
+  geom_sf(data=rn_pa_58570_sub, aes(fill = '2070'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#B34D00',  '2050' = '#DB6F1D','2030' = '#F0A461', 'Historical' = '#FFFF00'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', 'SSP585 2070'), name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
@@ -1446,7 +1492,7 @@ rn_ssp585_legend <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#B34D00',  '2050' = '#DB6F1D','2030' = '#F0A461', 'Historical' = '#FFFF00'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
         legend.text = element_text(colour = 'black', size = 12),
@@ -1454,7 +1500,7 @@ rn_ssp585_legend <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
         axis.text = element_text(colour = 'black', size = 12),
         title = element_text(colour = 'black', size = 16)) +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
-  ggtitle(expression(atop(paste(italic('Rubus nivalis'),' ','Forecasted'), paste('SSP585 Habitat Suitability'))))+
+  #ggtitle(expression(atop(paste(italic('Rubus nivalis'),' ','Forecasted'), paste('SSP585 Habitat Suitability'))))+
   easy_center_title()
 
 rn_ssp585_legend
@@ -1492,6 +1538,12 @@ rn_area_58550 <- terra::expanse(x=rn_pa_58550_sub, unit = 'km') %>%
 rn_area_58570 <- terra::expanse(x=rn_pa_58570_sub, unit = 'km') %>% 
   sum()
 
+rn_change_24530 <- ((rn_area_24530-rn_area_historical)/rn_area_historical)*100
+rn_change_24550 <- ((rn_area_24550-rn_area_historical)/rn_area_historical)*100 
+rn_change_24570 <- ((rn_area_24570-rn_area_historical)/rn_area_historical)*100
+rn_change_58530 <- ((rn_area_58530-rn_area_historical)/rn_area_historical)*100
+rn_change_58550 <- ((rn_area_58550-rn_area_historical)/rn_area_historical)*100
+rn_change_58570 <- ((rn_area_58570-rn_area_historical)/rn_area_historical)*100
 
 ##density plots for lat/lon distribution
 
@@ -1527,7 +1579,7 @@ ggplot() +
   ylab("Latitude") +
   xlab('Density') +
   theme_bw() +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#B34D00',  '2050' = '#DB6F1D','2030' = '#F0A461', 'Historical' = '#FFFF00'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
         legend.text = element_text(colour = 'black', size = 12),
@@ -1548,7 +1600,7 @@ ggplot() +
   xlab("Longitude") +
   ylab('Density') +
   theme_bw() +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#B34D00',  '2050' = '#DB6F1D','2030' = '#F0A461', 'Historical' = '#FFFF00'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
@@ -1569,7 +1621,7 @@ ggplot() +
   ylab("Latitude") +
   xlab('Density') +
   theme_bw() +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#B34D00',  '2050' = '#DB6F1D','2030' = '#F0A461', 'Historical' = '#FFFF00'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
         legend.text = element_text(colour = 'black', size = 12),
@@ -1590,7 +1642,7 @@ ggplot() +
   xlab("Longitude") +
   ylab('Density') +
   theme_bw() +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#B34D00',  '2050' = '#DB6F1D','2030' = '#F0A461', 'Historical' = '#FFFF00'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
         legend.text = element_text(colour = 'black', size = 12),
@@ -1602,7 +1654,7 @@ ggplot() +
 
 
 
-#V. parvifolium mapping----
+#V. parvifolium modeling----
 model_vp <- bioclim(x = bioclim_data_pnw, p=latlon_vp)
 
 #Predict presence from model
@@ -1732,8 +1784,27 @@ vp_pa_58570_crop<- crop(x=vp_pa_58570_vect, y=pnw.bound)
 vp_pa_58570_mask <- mask(x=vp_pa_58570_crop, mask=pnw.bound)
 vp_pa_58570_sub <- terra::subset(vp_pa_58570_mask, vp_pa_58570_mask$layer==1)
 
-#NOTE NEED TO CHANGE FILL COLOURS OF MOST PLOTS BELLOW 
-#AND OBJECT AND RASTER NAMES TO vp OBJECTS
+
+vp_observations <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey', colour = 'black') +
+  geom_point(data=latlon_vp_obs, aes(x=decimalLongitude, y=decimalLatitude, colour = record_fac) , size = 0.8) +
+  theme_bw() +
+  theme(axis.text = element_text(size = 12, colour = 'black')) +
+  annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
+  annotation_scale(width_hint=.3) +
+  theme(legend.background = element_rect(colour = 'black'),
+        legend.position = c(.2, .35),
+        legend.text = element_text(colour = 'black', size = 12),
+        legend.title = element_text(colour = 'black', size =12),
+        axis.text = element_text(colour = 'black', size = 12)) +
+  scale_x_continuous(breaks = c(-135, -125, -115)) +
+  #ggtitle(expression(atop(paste(italic('Amelanchier alnifolia')), paste('GBIF Research Grade Observations'))))+
+  labs(x=NULL, y=NULL) +
+  easy_center_title() +
+  scale_colour_manual(breaks = c("HUMAN_OBSERVATION", 'PRESERVED_SPECIMEN', 'OCCURRENCE'), values = c('PRESERVED_SPECIMEN' = '#E69F00', 'HUMAN_OBSERVATION' = '#0072B2', 'OCCURRENCE' = '#F0E442'), labels = c('Human\nObservation', 'Preserved\nSpecimen', 'Unspecified\nOccurence'), name = 'Basis of Record') +
+  guides(colour = guide_legend(override.aes = list(size=5), keyheight = 1.5))
+
+vp_observations
+
 #Historical habitat suitability 
 vp_historical <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
   geom_sf(data=vp_currentpa_sub, aes(fill = 'Historical'), colour = 'transparent') +
@@ -1742,28 +1813,28 @@ vp_historical <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = "Historical", values = c('Historical' = '#3333FF'), labels = 'Historical', name = 'Habitat Suitability') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', '2070'), name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
         legend.title = element_text(colour = 'black', size =12),
         axis.text = element_text(colour = 'black', size = 12)) +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
-  ggtitle('Historical Habitat\nSuitability (1970-2000)') +
+  #ggtitle('Historical Habitat\nSuitability (1970-2000)') +
   easy_center_title()
 
 vp_historical
 
 #ssp245 2030 suitability 
 vp_ssp245_2030 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=vp_currentpa_sub, aes(fill = 'Historical'), colour = 'transparent') +
+  #geom_sf(data=vp_currentpa_sub, aes(fill = 'Historical'), colour = 'transparent') +
   geom_sf(data=vp_pa_24530_sub, aes(fill = '2030'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030'), values = c('2030'= '#FFD5FF', 'Historical' = '#3333FF'), labels = c('Historical', '2030'), name = 'Habitat Suitability') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', 'SSP245 2030', '2050', '2070'), name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
@@ -1777,14 +1848,14 @@ vp_ssp245_2030
 
 #ssp245 2050 suitability 
 vp_ssp245_2050 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=vp_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
-  geom_sf(data=vp_pa_24550_sub, fill = '#ED83D1', colour = 'transparent') +
+  #geom_sf(data=vp_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
+  geom_sf(data=vp_pa_24550_sub, aes(fill = '2050'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#310354',  '2050' = '#7570B3','2030' = '#A5A4ED', 'Historical' = '#FF6666'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', 'SSP245 2050', '2070'), name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
@@ -1798,14 +1869,14 @@ vp_ssp245_2050
 
 #ssp245 2070 suitability 
 vp_ssp245_2070 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=vp_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
-  geom_sf(data=vp_pa_24570_sub, fill = '#E7298A', colour = 'transparent') +
+  #geom_sf(data=vp_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
+  geom_sf(data=vp_pa_24570_sub, aes(fill = '2070'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#310354',  '2050' = '#7570B3','2030' = '#A5A4ED', 'Historical' = '#FF6666'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', 'SSP245 2070'), name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
@@ -1828,7 +1899,7 @@ vp_ssp245_legend <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#310354',  '2050' = '#7570B3','2030' = '#A5A4ED', 'Historical' = '#FF6666'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
         legend.text = element_text(colour = 'black', size = 12),
@@ -1836,21 +1907,21 @@ vp_ssp245_legend <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
         axis.text = element_text(colour = 'black', size = 12),
         title = element_text(colour = 'black', size = 16)) +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
-  ggtitle(expression(atop(paste(italic('Vaccinium parvifolium'),' ','Forecasted'), paste('SSP245 Habitat Suitability'))))+
+  #ggtitle(expression(atop(paste(italic('Vaccinium parvifolium'),' ','Forecasted'), paste('SSP245 Habitat Suitability'))))+
   easy_center_title()
 
 vp_ssp245_legend
 
 #ssp585 2030 suitability 
 vp_ssp585_2030 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=vp_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
-  geom_sf(data=vp_pa_58530_sub, fill = '#FFD5FF', colour = 'transparent') +
+  #geom_sf(data=vp_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
+  geom_sf(data=vp_pa_58530_sub, aes(fill = '2030'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#310354',  '2050' = '#7570B3','2030' = '#A5A4ED', 'Historical' = '#FF6666'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', 'SSP585 2030', '2050', '2070'), name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
@@ -1864,14 +1935,14 @@ vp_ssp585_2030
 
 #ssp245 2050 suitability 
 vp_ssp585_2050 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=vp_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
-  geom_sf(data=vp_pa_58550_sub, fill = '#ED83D1', colour = 'transparent') +
+  #geom_sf(data=vp_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
+  geom_sf(data=vp_pa_58550_sub, aes(fill = '2050'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#310354',  '2050' = '#7570B3','2030' = '#A5A4ED', 'Historical' = '#FF6666'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', 'SSP585 2030', 'SSP585 2050', '2070'), name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
@@ -1885,14 +1956,14 @@ vp_ssp585_2050
 
 #ssp585 2070 suitability 
 vp_ssp585_2070 <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
-  geom_sf(data=vp_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
-  geom_sf(data=vp_pa_58570_sub, fill = '#E7298A', colour = 'transparent') +
+  #geom_sf(data=vp_currentpa_sub, fill = '#3333FF', colour = 'transparent') +
+  geom_sf(data=vp_pa_58570_sub, aes(fill = '2070'), colour = 'transparent') +
   geom_sf(data=pnw.bound, colour = 'black', fill = 'transparent') +
   theme_bw() +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#310354',  '2050' = '#7570B3','2030' = '#A5A4ED', 'Historical' = '#FF6666'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', 'SSP585 2070'), name = 'Habitat Suitability') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = c(.2, .3),
         legend.text = element_text(colour = 'black', size = 12),
@@ -1915,7 +1986,7 @@ vp_ssp585_legend <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
   theme(axis.text = element_text(size = 12, colour = 'black')) +
   annotation_north_arrow(style = north_arrow_orienteering, pad_y = unit(0.7, 'cm')) +
   annotation_scale(width_hint=.3) +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#310354',  '2050' = '#7570B3','2030' = '#A5A4ED', 'Historical' = '#FF6666'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
         legend.text = element_text(colour = 'black', size = 12),
@@ -1923,7 +1994,7 @@ vp_ssp585_legend <- ggplot() + geom_sf(data=pnw.bound, fill = 'grey') +
         axis.text = element_text(colour = 'black', size = 12),
         title = element_text(colour = 'black', size = 16)) +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
-  ggtitle(expression(atop(paste(italic('Vaccinium parvifolium'),' ','Forecasted'), paste('SSP585 Habitat Suitability'))))+
+  #ggtitle(expression(atop(paste(italic('Vaccinium parvifolium'),' ','Forecasted'), paste('SSP585 Habitat Suitability'))))+
   easy_center_title()
 
 vp_ssp585_legend
@@ -1960,6 +2031,12 @@ vp_area_58550 <- terra::expanse(x=vp_pa_58550_sub, unit = 'km') %>%
 vp_area_58570 <- terra::expanse(x=vp_pa_58570_sub, unit = 'km') %>% 
   sum()
 
+vp_change_24530 <- ((vp_area_24530-vp_area_historical)/vp_area_historical)*100
+vp_change_24550 <- ((vp_area_24550-vp_area_historical)/vp_area_historical)*100 
+vp_change_24570 <- ((vp_area_24570-vp_area_historical)/vp_area_historical)*100
+vp_change_58530 <- ((vp_area_58530-vp_area_historical)/vp_area_historical)*100
+vp_change_58550 <- ((vp_area_58550-vp_area_historical)/vp_area_historical)*100
+vp_change_58570 <- ((vp_area_58570-vp_area_historical)/vp_area_historical)*100
 
 ##density plots for lat/lon distribution
 
@@ -1995,7 +2072,7 @@ ggplot() +
   ylab("Latitude") +
   xlab('Density') +
   theme_bw() +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#310354',  '2050' = '#7570B3','2030' = '#A5A4ED', 'Historical' = '#FF6666'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
         legend.text = element_text(colour = 'black', size = 12),
@@ -2016,7 +2093,7 @@ ggplot() +
   xlab("Longitude") +
   ylab('Density') +
   theme_bw() +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#310354',  '2050' = '#7570B3','2030' = '#A5A4ED', 'Historical' = '#FF6666'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
   scale_x_continuous(breaks = c(-135, -125, -115)) +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
@@ -2037,7 +2114,7 @@ ggplot() +
   ylab("Latitude") +
   xlab('Density') +
   theme_bw() +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#310354',  '2050' = '#7570B3','2030' = '#A5A4ED', 'Historical' = '#FF6666'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
         legend.text = element_text(colour = 'black', size = 12),
@@ -2058,7 +2135,7 @@ ggplot() +
   xlab("Longitude") +
   ylab('Density') +
   theme_bw() +
-  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#310354',  '2050' = '#7570B3','2030' = '#A5A4ED', 'Historical' = '#FF6666'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
+  scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', '2070'), name = '') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
         legend.text = element_text(colour = 'black', size = 12),
