@@ -587,6 +587,22 @@ aa_pa58550points <- rasterToPoints(aa_pa58550, function(x)x==1)
 aa_pa58570 <- forecast_presence_aa_585_70 > threshold_aa 
 aa_pa58570points <- rasterToPoints(aa_pa58570, function(x)x==1)
 
+#median density and range
+aa_median_historical <- median(aa_currentpapoints[,2])
+aa_median_24530 <- median(aa_pa24530points[,2])
+aa_median_24550 <- median(aa_pa24550points[,2])
+aa_median_24570 <- median(aa_pa24570points[,2])
+aa_median_58530 <- median(aa_pa58530points[,2])
+aa_median_58550 <- median(aa_pa58550points[,2])
+aa_median_58570 <- median(aa_pa58570points[,2])
+aa_range_historical <- range(aa_currentpapoints[,2])
+aa_range_24530 <- range(aa_pa24530points[,2])
+aa_range_24550 <- range(aa_pa24550points[,2])
+aa_range_24570 <- range(aa_pa24570points[,2])
+aa_range_58530 <- range(aa_pa58530points[,2])
+aa_range_58550 <- range(aa_pa58550points[,2])
+aa_range_58570 <- range(aa_pa58570points[,2])
+
 #A. alnifolia density plots----
 #Lattitude density ssp245
 ggplot() +
@@ -599,6 +615,10 @@ ggplot() +
   xlab('Density') +
   theme_bw() +
   scale_fill_manual(breaks = c("Historical", '2030', '2050', '2070'), values = c('2070' = '#D55E00',  '2050' = '#E69F00','2030' = '#F0E442', 'Historical' = '#0072B2'), labels = c('Historical', '2030', '2050', 'SSP245 2070'), name = '') +
+  #geom_hline(yintercept = mean(aa_currentpapoints[,2]), linetype = 'solid', colour = '#0072B2') +
+  geom_hline(yintercept = median(aa_currentpapoints[,2]), linetype = 'dashed', colour = '#0072B2', size = 1.2) +
+  geom_hline(yintercept = median(aa_pa24570points[,2]), linetype = 'dashed', colour = '#D55E00', size = 1.2) +
+  #geom_hline(yintercept = mean(aa_pa24570points[,2]), linetype = 'solid', colour = '#D55E00') +
   theme(legend.background = element_rect(colour = 'black'),
         legend.position = 'top',
         legend.text = element_text(colour = 'black', size = 12),
@@ -636,6 +656,8 @@ ggplot() +
     #geom_density(aes(y = aa_pa58530points[,2], fill = "2030"), alpha = 0.2) +
     #geom_density(aes(y = aa_pa58550points[,2], fill = "2050"), alpha = 0.2) +
     geom_density(aes(y = aa_pa58570points[,2], fill = "2070"), alpha = .8) +
+    geom_hline(yintercept = median(aa_currentpapoints[,2]), linetype = 'dashed', colour = '#0072B2', size = 1.2) +
+    geom_hline(yintercept = median(aa_pa58570points[,2]), linetype = 'dashed', colour = '#D55E00', size = 1.2) +
     #ggtitle("Change in Latitudinal Distribution of A. alnifolia under SSP585") +
     ylab("Latitude") +
     xlab('Density') +
@@ -1074,6 +1096,23 @@ rl_pa58550points <- rasterToPoints(rl_pa58550, function(x)x==1)
 rl_pa58570 <- forecast_presence_rl_585_70 > threshold_rl 
 rl_pa58570points <- rasterToPoints(rl_pa58570, function(x)x==1)
 
+
+#median density and range
+rl_median_historical <- median(rl_currentpapoints[,2])
+rl_median_24530 <- median(rl_pa24530points[,2])
+rl_median_24550 <- median(rl_pa24550points[,2])
+rl_median_24570 <- median(rl_pa24570points[,2])
+rl_median_58530 <- median(rl_pa58530points[,2])
+rl_median_58550 <- median(rl_pa58550points[,2])
+rl_median_58570 <- median(rl_pa58570points[,2])
+rl_range_historical <- range(rl_currentpapoints[,2])
+rl_range_24530 <- range(rl_pa24530points[,2])
+rl_range_24550 <- range(rl_pa24550points[,2])
+rl_range_24570 <- range(rl_pa24570points[,2])
+rl_range_58530 <- range(rl_pa58530points[,2])
+rl_range_58550 <- range(rl_pa58550points[,2])
+rl_range_58570 <- range(rl_pa58570points[,2])
+
 #R. lasiococcus density plots----
 #Lattitude density ssp245
 ggplot() +
@@ -1081,6 +1120,8 @@ ggplot() +
   #geom_density(aes(y = rl_pa24530points[,2], fill = "2030"), alpha = 0.2) +
   #geom_density(aes(y = rl_pa24550points[,2], fill = "2050"), alpha = 0.2) +
   geom_density(aes(y = rl_pa24570points[,2], fill = "2070"), alpha = .8) +
+  geom_hline(yintercept = median(rl_currentpapoints[,2]), linetype = 'dashed', colour = '#0072B2', size = 1.2) +
+  geom_hline(yintercept = median(rl_pa24570points[,2]), linetype = 'dashed', colour = '#D55E00', size = 1.2) +
   #ggtitle("Change in Latitudinal Distribution of A. alnifolia under SSP245") +
   ylab("Latitude") +
   xlab('Density') +
@@ -1123,6 +1164,8 @@ ggplot() +
   #geom_density(aes(y = rl_pa58530points[,2], fill = "2030"), alpha = 0.2) +
   #geom_density(aes(y = rl_pa58550points[,2], fill = "2050"), alpha = 0.2) +
   geom_density(aes(y = rl_pa58570points[,2], fill = "2070"), alpha = .8) +
+  geom_hline(yintercept = median(rl_currentpapoints[,2]), linetype = 'dashed', colour = '#0072B2', size = 1.2) +
+  geom_hline(yintercept = median(rl_pa58570points[,2]), linetype = 'dashed', colour = '#D55E00', size = 1.2) +
   #ggtitle("Change in Latitudinal Distribution of A. alnifolia under SSP585") +
   ylab("Latitude") +
   xlab('Density') +
@@ -1545,6 +1588,7 @@ rn_change_58530 <- ((rn_area_58530-rn_area_historical)/rn_area_historical)*100
 rn_change_58550 <- ((rn_area_58550-rn_area_historical)/rn_area_historical)*100
 rn_change_58570 <- ((rn_area_58570-rn_area_historical)/rn_area_historical)*100
 
+
 ##density plots for lat/lon distribution
 
 rn_currentpa <- predict_presence_rn>threshold_rn 
@@ -1568,6 +1612,23 @@ rn_pa58550points <- rasterToPoints(rn_pa58550, function(x)x==1)
 rn_pa58570 <- forecast_presence_rn_585_70 > threshold_rn 
 rn_pa58570points <- rasterToPoints(rn_pa58570, function(x)x==1)
 
+
+#median density and range
+rn_median_historical <- median(rn_currentpapoints[,2])
+rn_median_24530 <- median(rn_pa24530points[,2])
+rn_median_24550 <- median(rn_pa24550points[,2])
+rn_median_24570 <- median(rn_pa24570points[,2])
+rn_median_58530 <- median(rn_pa58530points[,2])
+rn_median_58550 <- median(rn_pa58550points[,2])
+rn_median_58570 <- median(rn_pa58570points[,2])
+rn_range_historical <- range(rn_currentpapoints[,2])
+rn_range_24530 <- range(rn_pa24530points[,2])
+rn_range_24550 <- range(rn_pa24550points[,2])
+rn_range_24570 <- range(rn_pa24570points[,2])
+rn_range_58530 <- range(rn_pa58530points[,2])
+rn_range_58550 <- range(rn_pa58550points[,2])
+rn_range_58570 <- range(rn_pa58570points[,2])
+
 #R. nivalis density plots----
 #Lattitude density ssp245
 ggplot() +
@@ -1575,6 +1636,8 @@ ggplot() +
   #geom_density(aes(y = rn_pa24530points[,2], fill = "2030"), alpha = 0.2) +
   #geom_density(aes(y = rn_pa24550points[,2], fill = "2050"), alpha = 0.2) +
   geom_density(aes(y = rn_pa24570points[,2], fill = "2070"), alpha = .8) +
+  geom_hline(yintercept = median(rn_currentpapoints[,2]), linetype = 'dashed', colour = '#0072B2', size = 1.2) +
+  geom_hline(yintercept = median(rn_pa24570points[,2]), linetype = 'dashed', colour = '#D55E00', size = 1.2) +
   #ggtitle("Change in Latitudinal Distribution of A. alnifolia under SSP245") +
   ylab("Latitude") +
   xlab('Density') +
@@ -1617,6 +1680,8 @@ ggplot() +
   #geom_density(aes(y = rn_pa58530points[,2], fill = "2030"), alpha = 0.2) +
   #geom_density(aes(y = rn_pa58550points[,2], fill = "2050"), alpha = 0.2) +
   geom_density(aes(y = rn_pa58570points[,2], fill = "2070"), alpha = .8) +
+  geom_hline(yintercept = median(rn_currentpapoints[,2]), linetype = 'dashed', colour = '#0072B2', size = 1.2) +
+  geom_hline(yintercept = median(rn_pa58570points[,2]), linetype = 'dashed', colour = '#D55E00', size = 1.2) +
   #ggtitle("Change in Latitudinal Distribution of A. alnifolia under SSP585") +
   ylab("Latitude") +
   xlab('Density') +
@@ -2061,6 +2126,22 @@ vp_pa58550points <- rasterToPoints(vp_pa58550, function(x)x==1)
 vp_pa58570 <- forecast_presence_vp_585_70 > threshold_vp 
 vp_pa58570points <- rasterToPoints(vp_pa58570, function(x)x==1)
 
+#median density and range
+vp_median_historical <- median(vp_currentpapoints[,2])
+vp_median_24530 <- median(vp_pa24530points[,2])
+vp_median_24550 <- median(vp_pa24550points[,2])
+vp_median_24570 <- median(vp_pa24570points[,2])
+vp_median_58530 <- median(vp_pa58530points[,2])
+vp_median_58550 <- median(vp_pa58550points[,2])
+vp_median_58570 <- median(vp_pa58570points[,2])
+vp_range_historical <- range(vp_currentpapoints[,2])
+vp_range_24530 <- range(vp_pa24530points[,2])
+vp_range_24550 <- range(vp_pa24550points[,2])
+vp_range_24570 <- range(vp_pa24570points[,2])
+vp_range_58530 <- range(vp_pa58530points[,2])
+vp_range_58550 <- range(vp_pa58550points[,2])
+vp_range_58570 <- range(vp_pa58570points[,2])
+
 #V parvifolium  density plots----
 #Lattitude density ssp245
 ggplot() +
@@ -2068,6 +2149,8 @@ ggplot() +
   #geom_density(aes(y = vp_pa24530points[,2], fill = "2030"), alpha = 0.2) +
   #geom_density(aes(y = vp_pa24550points[,2], fill = "2050"), alpha = 0.2) +
   geom_density(aes(y = vp_pa24570points[,2], fill = "2070"), alpha = .8) +
+  geom_hline(yintercept = median(vp_currentpapoints[,2]), linetype = 'dashed', colour = '#0072B2', size = 1.2) +
+  geom_hline(yintercept = median(vp_pa24570points[,2]), linetype = 'dashed', colour = '#D55E00', size = 1.2) +
   #ggtitle("Change in Latitudinal Distribution of A. alnifolia under SSP245") +
   ylab("Latitude") +
   xlab('Density') +
@@ -2110,6 +2193,8 @@ ggplot() +
   #geom_density(aes(y = vp_pa58530points[,2], fill = "2030"), alpha = 0.2) +
   #geom_density(aes(y = vp_pa58550points[,2], fill = "2050"), alpha = 0.2) +
   geom_density(aes(y = vp_pa58570points[,2], fill = "2070"), alpha = .8) +
+  geom_hline(yintercept = median(vp_currentpapoints[,2]), linetype = 'dashed', colour = '#0072B2', size = 1.2) +
+  geom_hline(yintercept = median(vp_pa58570points[,2]), linetype = 'dashed', colour = '#D55E00', size = 1.2) +
   #ggtitle("Change in Latitudinal Distribution of A. alnifolia under SSP585") +
   ylab("Latitude") +
   xlab('Density') +
